@@ -5,24 +5,28 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.example.transparentkey_aos.databinding.FragmentMainBinding
+import com.example.transparentkey_aos.databinding.FragmentEmbeddingSelectBinding
 
-class MainFragment : Fragment() {
-    lateinit var binding: FragmentMainBinding
+class EmbedSelectFragment: Fragment() {
+    lateinit var binding : FragmentEmbeddingSelectBinding
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        binding = FragmentMainBinding.inflate(inflater, container, false)
+        binding = FragmentEmbeddingSelectBinding.inflate(inflater, container, false)
         return binding.root
     }
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.btnEmbed.setOnClickListener {
-            replaceFragment(EmbedSelectFragment())
+        binding.btnCam.setOnClickListener {
+            replaceFragment(EmbedCamFragment())
+        }
+        binding.btnPhotos.setOnClickListener {
+            replaceFragment(EmbedPhotosFragment())
         }
     }
 
