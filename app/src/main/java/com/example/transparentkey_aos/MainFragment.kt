@@ -15,6 +15,12 @@ class MainFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         binding = FragmentMainBinding.inflate(inflater, container, false)
+
+        binding.btnExtract.setOnClickListener {
+            (context as MainActivity).supportFragmentManager.beginTransaction()
+                .replace(R.id.main, CertificationFragment1())
+                .commitAllowingStateLoss()
+        }
         return binding.root
     }
 }
