@@ -55,11 +55,11 @@ class MainActivity : AppCompatActivity() {
      * 권한 체크
      */
     fun checkPermission() {
-        Toast.makeText(this, "stark check permission", Toast.LENGTH_SHORT).show()
+//        Toast.makeText(this, "stark check permission", Toast.LENGTH_SHORT).show()
         val cameraPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
 
         if (cameraPermission == PackageManager.PERMISSION_GRANTED){
-            Toast.makeText(this, "이미 권한이 승인됨", Toast.LENGTH_SHORT).show()
+//            Toast.makeText(this, "이미 권한이 승인됨", Toast.LENGTH_SHORT).show()
         } else {
             requestPermission()
         }
@@ -93,7 +93,7 @@ class MainActivity : AppCompatActivity() {
                     grantResults[2] == PackageManager.PERMISSION_GRANTED
                 ) {
                     // 권한 승인됨
-                    Toast.makeText(this, "권한 승인", Toast.LENGTH_SHORT).show()
+//                    Toast.makeText(this, "권한 승인", Toast.LENGTH_SHORT).show()
                     return
                 } else {
                     Toast.makeText(this, "권한을 승인하지 않으면 앱이 종료됩니다.", Toast.LENGTH_SHORT).show()
