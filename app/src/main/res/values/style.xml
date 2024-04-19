@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="NoAnimationBottomNavigationView" parent="Widget.Design.BottomNavigationView">
+        <item name="android:animateLayoutChanges">false</item>
+        <item name="android:transitionGroup">false</item>
+        <item name="fontFamily">@font/pretendard_medium</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:minHeight">0dp</item>
+    </style>
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowAnimationStyle">@android:style/Animation</item>
+    </style>
+</resources>

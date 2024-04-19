@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:name="com.example.transparentkey_aos.EmbedSelectFragment"
+    >
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/cam_fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="54dp"
+        app:layout_constraintBottom_toTopOf="@+id/bottomNavigationView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="30dp"
+            android:fontFamily="@font/pretendard_bold"
+            android:text="워터마크할 사진 선택"
+            android:textColor="@color/black"
+            android:textSize="24dp"
+            app:layout_constraintBottom_toTopOf="@+id/btn_cam"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <Button
+            android:id="@+id/btn_cam"
+            android:layout_width="130dp"
+            android:layout_height="130dp"
+            android:layout_marginTop="220dp"
+            android:background="@drawable/style_main_btn"
+            android:fontFamily="@font/pretendard_bold"
+            android:text="촬영하기"
+            android:textSize="16dp"
+            app:layout_constraintEnd_toStartOf="@+id/btn_photos"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/btn_photos"
+            android:layout_width="130dp"
+            android:layout_height="130dp"
+            android:background="@drawable/style_main_btn"
+            android:fontFamily="@font/pretendard_bold"
+            android:paddingLeft="0dp"
+            android:paddingRight="0dp"
+            android:text="앨범에서 선택"
+            android:textSize="16dp"
+            app:layout_constraintBottom_toBottomOf="@+id/btn_cam"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/btn_cam"
+            app:layout_constraintTop_toTopOf="@+id/btn_cam" />
+
+        <ImageView
+            android:id="@+id/iv_cam"
+            android:layout_width="130dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="130dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/btn_cam" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavigationView"
+        android:layout_width="0dp"
+        android:layout_height="52dp"
+        app:itemHorizontalTranslationEnabled="false"
+        app:itemRippleColor="@null"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:menu="@menu/bottom_navigation_menu"
+        app:theme="@style/NoAnimationBottomNavigationView" />
+</androidx.constraintlayout.widget.ConstraintLayout>

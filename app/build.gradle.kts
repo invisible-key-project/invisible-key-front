@@ -49,4 +49,5 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     implementation("androidx.fragment:fragment-ktx:1.6.2")
+    implementation("io.github.ParkSangGwon:tedpermission-normal:3.3.0")
 }
