@@ -17,15 +17,16 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
 import com.example.transparentkey_aos.databinding.FragmentEmbedSelectBinding
 
-class EmbedSelectFragment: Fragment() {
-    lateinit var binding : FragmentEmbedSelectBinding
+class EmbedSelectFragment : Fragment() {
+    lateinit var binding: FragmentEmbedSelectBinding
     val REQUEST_IMAGE_CAPTURE = 1 // 카메라 사진 촬영 요청 코드
     private lateinit var selectedImg: Bitmap
-    private val REQUEST_KEY = "request_key" // api요청 키
+    private val REQUEST_KEY = "selected_img" // 요청 키
     lateinit var curPhotoPath: String // 문자열 형태 사진 경로 값
     private var launcher = registerForActivityResult(ActivityResultContracts.GetContent()) { it ->
         setGallery(uri = it)
     }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

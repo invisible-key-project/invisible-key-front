@@ -9,14 +9,17 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.core.os.bundleOf
+import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.setFragmentResultListener
 import com.example.transparentkey_aos.databinding.FragmentEmbedWatermarkSelectBinding
 import com.example.transparentkey_aos.databinding.FragmentEmbedSelectBinding
 
 class EmbedWatermarkSelectFragment : Fragment() {
-    lateinit var binding : FragmentEmbedWatermarkSelectBinding
-    lateinit var selectedImg : Bitmap
-    private val REQUEST_KEY = "request_key" // api요청 키
+    lateinit var binding: FragmentEmbedWatermarkSelectBinding
+    lateinit var selectedImg: Bitmap
+    private val REQUEST_KEY = "selected_img" // 데이터 요청 키
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,17 +32,19 @@ class EmbedWatermarkSelectFragment : Fragment() {
     ): View? {
         binding = FragmentEmbedWatermarkSelectBinding.inflate(inflater, container, false)
 
-//        binding.ivSelected.setColorFilter(Color.parseColor("#BDBDBD"), PorterDuff.Mode.MULTIPLY)
+//        Toast.makeText(context, "watermark select fragment", Toast.LENGTH_SHORT).show()
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.btnQr.setOnClickListener {
+            setFragmentResult("wmSelection", bundleOf("selection" to 1))
             showDialog()
         }
         binding.btnImg.setOnClickListener {
             showDialog()
+            setFragmentResult("wmSelection", bundleOf("selection" to 2))
         }
     }
 
@@ -48,8 +53,8 @@ class EmbedWatermarkSelectFragment : Fragment() {
 
         // 이미지 수신
         setFragmentResultListener(REQUEST_KEY) { key, bundle ->
-            val img:Bitmap? = bundle.getParcelable("selected_img")
-            if(img != null) { // null이 아닐 때만 사용
+            val img: Bitmap? = bundle.getParcelable("selected_imgf")
+            if (img != null) { // null이 아닐 때만 사용
                 selectedImg = img
                 binding.ivSelected.setImageBitmap(selectedImg) // 이미지 iv에 배치
             }
@@ -68,7 +73,7 @@ class EmbedWatermarkSelectFragment : Fragment() {
     /**
      * show dialog
      */
-    private fun showDialog(){
+    private fun showDialog() {
         val dialogFragment = EmbedDialogFragment()
         dialogFragment.show(parentFragmentManager, "embedDialog")
     }
