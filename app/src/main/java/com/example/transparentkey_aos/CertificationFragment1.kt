@@ -22,7 +22,9 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModelProvider
 import com.example.transparentkey_aos.databinding.FragmentCertification1Binding
+import com.example.transparentkey_aosdata.ServerResponse
 import okhttp3.MediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -55,7 +57,7 @@ class CertificationFragment1 : Fragment() {
     }
 
     val retrofit = Retrofit.Builder()
-        .baseUrl("http://172.20.68.43:8000/") // 서버 URL
+        .baseUrl("http://192.168.45.238:8000/") // 서버 URL
         .addConverterFactory(GsonConverterFactory.create()) // JSON 변환기
         .build()
 
@@ -159,6 +161,11 @@ class CertificationFragment1 : Fragment() {
                 if (response.isSuccessful) {
                     // 서버로부터의 응답을 받음
                     val serverResponse = response.body()
+                    // ViewModel 인스턴스 가져오기
+                    val viewModel = ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
+                    // ViewModel에 ServerResponse 저장
+                    viewModel.serverResponse.value = serverResponse
+
                     val base64EncodedImage = serverResponse?.watermark ?: ""
 
                     // Base64 문자열을 바이트 배열로 디코딩

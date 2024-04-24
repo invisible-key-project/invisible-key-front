@@ -5,6 +5,8 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import com.example.transparentkey_aos.databinding.FragmentCertification2Binding
 
 
@@ -29,6 +31,20 @@ class CertificationFragment2 : Fragment() {
             binding.cert2ResultIv.setImageBitmap(image)
         }
 
+        // ViewModel 인스턴스 가져오기
+        val viewModel = ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
+
+        // LiveData 관찰
+        viewModel.serverResponse.observe(viewLifecycleOwner, Observer { serverResponse ->
+            // serverResponse 사용
+            // 예: textView.text = serverResponse.userId
+            binding.cert2IdTv.text = serverResponse.userId
+            val serverResponseDate = "240418"
+            val formattedDate = simpleFormatDateString(serverResponseDate)
+            println(formattedDate)
+            binding.cert2DateTv.text = formattedDate
+        })
+
         binding.cert2EndBtn.setOnClickListener {
             // ImageStorage 초기화
             CertificationFragment1.ImageStorage.clear()
@@ -37,7 +53,17 @@ class CertificationFragment2 : Fragment() {
             returnToMainFragment()
         }
 
+
         return binding.root
+    }
+
+    fun simpleFormatDateString(date: String): String {
+        // 날짜 형식: YYMMDD
+        val year = date.substring(0..1)
+        val month = date.substring(2..3)
+        val day = date.substring(4..5)
+
+        return "$year 년 $month 월 $day 일"
     }
 
     fun returnToMainFragment() {
