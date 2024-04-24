@@ -51,24 +51,21 @@ class EmbedImageSelectFragment : Fragment() {
                 val inputStream = requireActivity().contentResolver.openInputStream(uri)
                 selectedWatermark = BitmapFactory.decodeStream(inputStream)
 
-                // 다음 프래그먼트로 전환
-                replaceFragment(EmbedFragment(), selectedWatermark)
+                // 다음 다이얼로그로 전환
+                setFragmentResult(REQUEST_KEY, bundleOf("wm_img" to selectedWatermark))
+                showImgDialog()
             } catch (e: Exception) {
                 Log.e("EmbedImageSelectFragment", "Image selection failed", e)
             }
         }
     }
 
-    /**
-     * replace fragment
-     */
-    fun replaceFragment(fragment: Fragment, img: Bitmap) {
-        // 데이터 전송
-        setFragmentResult(REQUEST_KEY, bundleOf("wm_img" to img))
 
-        requireActivity().supportFragmentManager.beginTransaction()
-            .replace(R.id.fragmentCotainer, fragment)
-            .addToBackStack(null)
-            .commit()
+    /**
+     * show img dialog
+     */
+    private fun showImgDialog() {
+        val dialogFragment = EmbedDialogImgFragment()
+        dialogFragment.show(parentFragmentManager, "embedImgDialog")
     }
 }

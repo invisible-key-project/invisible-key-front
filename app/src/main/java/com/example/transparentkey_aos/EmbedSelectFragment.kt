@@ -3,9 +3,11 @@ package com.example.transparentkey_aos
 
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -66,11 +68,20 @@ class EmbedSelectFragment : Fragment() {
     }
 
     /**
-     * 갤러리 실행
+     * 갤러리 실행, selectedWatermark에 bitmap으로 저장
      */
     fun setGallery(uri: Uri?) {
-        binding.ivCam.setImageURI(uri)
-        replaceFragment(EmbedWatermarkSelectFragment(), selectedImg)
+        uri?.let {
+            try {
+                val inputStream = requireActivity().contentResolver.openInputStream(uri)
+                selectedImg = BitmapFactory.decodeStream(inputStream)
+
+                // 다음 프래그먼트로 전환
+                replaceFragment(EmbedWatermarkSelectFragment(), selectedImg)
+            } catch (e: Exception) {
+                Log.e("EmbedImageSelectFragment", "Image selection failed", e)
+            }
+        }
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.example.transparentkey_aos
 
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -12,18 +13,26 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.setFragmentResultListener
 import com.example.transparentkey_aos.databinding.FragmentEmbedDialogBinding
+import com.example.transparentkey_aos.databinding.FragmentEmbedDialogImgBinding
 import com.example.transparentkey_aos.databinding.FragmentEmbedSelectBinding
 import java.util.Date
 
-class EmbedDialogFragment : DialogFragment() {
-    private lateinit var binding: FragmentEmbedDialogBinding
-    private lateinit var id: String
-    private lateinit var name: String
-    private lateinit var date: String
-
-        override fun onCreate(savedInstanceState: Bundle?) {
+class EmbedDialogImgFragment : DialogFragment() {
+    private lateinit var binding: FragmentEmbedDialogImgBinding
+    private lateinit var wm_img: Bitmap
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         isCancelable = true
+        // 이미지 수신
+        @Suppress("DEPRECATION")
+        setFragmentResultListener("wm_img") { key, bundle ->
+            val img: Bitmap? = bundle.getParcelable("wm_img")
+            if (img != null) { // null이 아닐 때만 사용
+                wm_img = img
+                binding.ivDialog.setImageBitmap(wm_img) // 이미지 iv에 배치
+            }
+        }
+
     }
 
     override fun onCreateView(
@@ -31,26 +40,17 @@ class EmbedDialogFragment : DialogFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        binding = FragmentEmbedDialogBinding.inflate(inflater, container, false)
+        binding = FragmentEmbedDialogImgBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        id = "12345678"
-        name = "홍길동"
-        date = "24.03.23."
-
-        binding.tvDlIdRes.text = id
-        binding.tvDlNameRes.text = name
-        binding.tvDlDateRes.text = date
-
         binding.btnDlConfirm.setOnClickListener {
-            setFragmentResult("qrData", bundleOf("id" to id, "date" to date))
             dismiss()
-            replaceFragment(EmbedGenerateQRFragment()) // QR 삽입 선택 시 실행
-            // EmbedGenateQrFragment로 QR에 담을 정보를 넘겨준다.
+            replaceFragment(EmbedFragment())
+
         }
     }
 
