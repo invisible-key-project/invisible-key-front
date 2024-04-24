@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="156dp"
         android:fontFamily="@font/pretendard_bold"
-        android:text="워터마크할 사진 선택"
+        android:text="워터마크 이미지 선택"
         android:textColor="@color/black"
         android:textSize="24dp"
         app:layout_constraintEnd_toEndOf="parent"
