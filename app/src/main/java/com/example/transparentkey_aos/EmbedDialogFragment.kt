@@ -24,26 +24,6 @@ class EmbedDialogFragment : DialogFragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         isCancelable = true
-
-        // 결과 수신을 위한 리스너 등록
-        setFragmentResultListener("wmSelection") { key, bundle ->
-            val selection = bundle.getInt("selection", -1)
-            when (selection) {
-                1 -> {
-                    // btn1을 선택한 경우
-                    wmSelection = 1
-                }
-
-                2 -> {
-                    wmSelection = 2
-                }
-
-                else -> {
-                    // 예외 처리
-                    Toast.makeText(context, "버튼 선택 결과 전송 실패", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
     }
 
     override fun onCreateView(
@@ -58,7 +38,7 @@ class EmbedDialogFragment : DialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        id = "helloworld"
+        id = "12345678"
         name = "홍길동"
         date = "24.03.23."
 
@@ -67,15 +47,10 @@ class EmbedDialogFragment : DialogFragment() {
         binding.tvDlDateRes.text = date
 
         binding.btnDlConfirm.setOnClickListener {
+            setFragmentResult("qrData", bundleOf("id" to id, "date" to date))
             dismiss()
-            if (wmSelection == 1) {
-                replaceFragment(EmbedGenerateQRFragment()) // QR 삽입 선택 시 실행
-                // EmbedGenateQrFragment로 QR에 담을 정보를 넘겨준다.
-                setFragmentResult("qrData", bundleOf("id" to id, "date" to date))
-            } else {
-                replaceFragment(EmbedImageSelectFragment()) // 이미지 삽입 선택 시 실행
-            }
-
+            replaceFragment(EmbedGenerateQRFragment()) // QR 삽입 선택 시 실행
+            // EmbedGenateQrFragment로 QR에 담을 정보를 넘겨준다.
         }
     }
 

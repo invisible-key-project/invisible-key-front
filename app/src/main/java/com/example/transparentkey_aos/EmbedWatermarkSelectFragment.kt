@@ -43,8 +43,8 @@ class EmbedWatermarkSelectFragment : Fragment() {
             showDialog()
         }
         binding.btnImg.setOnClickListener {
-            showDialog()
             setFragmentResult("wmSelection", bundleOf("selection" to 2))
+            replaceFragment(EmbedImageSelectFragment())
         }
     }
 
@@ -52,8 +52,9 @@ class EmbedWatermarkSelectFragment : Fragment() {
         super.onStart()
 
         // 이미지 수신
+        @Suppress("DEPRECATION")
         setFragmentResultListener(REQUEST_KEY) { key, bundle ->
-            val img: Bitmap? = bundle.getParcelable("selected_imgf")
+            val img: Bitmap? = bundle.getParcelable("selected_img")
             if (img != null) { // null이 아닐 때만 사용
                 selectedImg = img
                 binding.ivSelected.setImageBitmap(selectedImg) // 이미지 iv에 배치

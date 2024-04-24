@@ -5,6 +5,6 @@ import retrofit2.http.Body
 import retrofit2.http.POST
 
 interface ApiQRCode {
-    @POST("/app/gen_qr/")
+    @POST("/app/embed/receive_qrdata/")
     fun sendQRData(@Body data: QRModel): Call<ResponseQRModel>
 }

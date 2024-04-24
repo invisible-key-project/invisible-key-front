@@ -1,8 +1,8 @@
 package com.example.transparentkey_aos.retrofit2
 
 data class QRModel(
-    val id: String,
-    val date: String
+    val id: Int,
+    val date: Int
 )
 
 data class ResponseQRModel(

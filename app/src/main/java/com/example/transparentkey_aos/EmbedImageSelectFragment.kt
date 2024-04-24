@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
 import com.example.transparentkey_aos.databinding.FragmentEmbedImageSelectBinding
@@ -63,9 +64,7 @@ class EmbedImageSelectFragment : Fragment() {
      */
     fun replaceFragment(fragment: Fragment, img: Bitmap) {
         // 데이터 전송
-        setFragmentResult(REQUEST_KEY, Bundle().apply {
-            putParcelable("wm_img", img)
-        })
+        setFragmentResult(REQUEST_KEY, bundleOf("wm_img" to img))
 
         requireActivity().supportFragmentManager.beginTransaction()
             .replace(R.id.fragmentCotainer, fragment)

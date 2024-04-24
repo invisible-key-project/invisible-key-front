@@ -43,15 +43,6 @@ class EmbedSelectFragment : Fragment() {
         binding.btnCam.setOnClickListener {
             // 카메라 실행
             val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)//.also {
-            /*imageCaptureIntent -> imageCaptureIntent.resolveActivity(packageManager)?.also {
-                activityResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult())  { result ->
-                    print(result.resultCode)
-                    if (result.resultCode == 1) {
-
-                    }
-                }
-                }*/
-            //}
             startActivityForResult(intent, REQUEST_IMAGE_CAPTURE)
         }
         binding.btnPhotos.setOnClickListener {
@@ -87,9 +78,7 @@ class EmbedSelectFragment : Fragment() {
      */
     fun replaceFragment(fragment: Fragment, img: Bitmap) {
         // 데이터 전송
-        setFragmentResult(REQUEST_KEY, Bundle().apply {
-            putParcelable("selected_img", img)
-        })
+        setFragmentResult(REQUEST_KEY, bundleOf("selected_img" to img))
 
         requireActivity().supportFragmentManager.beginTransaction()
             .replace(R.id.fragmentCotainer, fragment)
