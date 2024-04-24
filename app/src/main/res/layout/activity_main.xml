@@ -22,16 +22,8 @@
         android:layout_width="0dp"
         android:layout_height="77dp"
         android:background="@color/white"
-        app:menu="@menu/bottom_navigation_menu"
-        app:itemTextAppearanceActiveBoldEnabled="true"
-        app:itemTextAppearanceActive="@font/pretendard_medium"
-        app:itemTextAppearanceInactive="@font/pretendard_medium"
-        app:itemHorizontalTranslationEnabled="false"
-        app:itemIconTint="@color/color_item_grey"
-        app:itemTextColor="@color/color_item_text"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:theme="@style/NoAnimationBottomNavigationView" />
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
