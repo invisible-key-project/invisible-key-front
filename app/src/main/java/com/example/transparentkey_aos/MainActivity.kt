@@ -2,6 +2,8 @@ package com.example.transparentkey_aos
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -24,6 +26,10 @@ class MainActivity : AppCompatActivity() {
 
         //MainFragment로 시작
         replaceFragment(MainFragment())
+
+        val nav = binding.bottomNavigationView
+        val ripple = ColorStateList.valueOf(Color.TRANSPARENT)
+        nav.itemRippleColor = ripple
 
         binding.bottomNavigationView.setOnItemSelectedListener { menuItem ->
             // 이전에 선택되었던 아이템의 아이콘 색상 원래 색상으로 되돌리기
