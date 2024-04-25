@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
+  
     <style name="noAnimBottomNavigationView">
         <item name="android:animateLayoutChanges">false</item>
         <item name="android:transitionGroup">false</item>
@@ -19,4 +19,5 @@
         <item name="android:textColor">@color/white</item>
         <item name="fontFamily">@font/pretendard_medium</item>
     </style>
+  
 </resources>
