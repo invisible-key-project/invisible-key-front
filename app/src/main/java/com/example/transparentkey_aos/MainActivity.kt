@@ -1,11 +1,14 @@
 package com.example.transparentkey_aos
 
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
@@ -30,6 +33,10 @@ class MainActivity : AppCompatActivity() {
         //MainFragment로 시작
         replaceFragment(MainFragment())
 
+        val nav = binding.bottomNavigationView
+        val ripple = ColorStateList.valueOf(Color.TRANSPARENT)
+        nav.itemRippleColor = ripple
+
         binding.bottomNavigationView.setOnItemSelectedListener { menuItem ->
             // 이전에 선택되었던 아이템의 아이콘 색상 원래 색상으로 되돌리기
             resetMenuItemColors()
@@ -50,6 +57,7 @@ class MainActivity : AppCompatActivity() {
             }
             true
         }
+
     }
     /**
      * 권한 체크
@@ -102,6 +110,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
     private fun replaceFragment(fragment: Fragment){
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragmentCotainer, fragment)
@@ -115,7 +124,7 @@ class MainActivity : AppCompatActivity() {
         val menu = binding.bottomNavigationView.menu
         for (i in 0 until menu.size()) {
             val menuItem = menu.getItem(i)
-            menuItem.icon?.setTint(ContextCompat.getColor(this, R.color.color_gray_light))
+            menuItem.icon?.setTint(ContextCompat.getColor(this, R.color.selected_icon_color))
         }
     }
 }
