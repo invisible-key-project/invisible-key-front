@@ -7,7 +7,7 @@
     </style>
 
     <style name="Widget.BottomNavigationView" parent="Widget.MaterialComponents.BottomNavigationView">
-        <item name="itemIconSize">26dp</item> <!-- 아이콘 크기 조정 -->
+        <item name="itemIconSize">25dp</item> <!-- 아이콘 크기 조정 -->
         <item name="iconTint">@drawable/ic_color_selector</item>
         <item name="itemTextAppearance">@style/MyBottomNavigationViewTextAppearance</item>
         <item name="labelVisibilityMode">labeled</item> <!-- 항상 라벨 표시 -->
