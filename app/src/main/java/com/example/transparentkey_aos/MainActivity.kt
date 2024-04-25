@@ -1,5 +1,7 @@
 package com.example.transparentkey_aos
 
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -23,6 +25,10 @@ class MainActivity : AppCompatActivity() {
 
         //MainFragment로 시작
         replaceFragment(MainFragment())
+
+        val nav = binding.bottomNavigationView
+        val ripple = ColorStateList.valueOf(Color.TRANSPARENT)
+        nav.itemRippleColor = ripple
     }
     private fun replaceFragment(fragment: Fragment){
         supportFragmentManager.beginTransaction()
