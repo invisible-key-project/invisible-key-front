@@ -13,7 +13,8 @@ import com.example.transparentkey_aos.databinding.FragmentEmbedBinding
 class EmbedFragment : Fragment() {
     lateinit var binding: FragmentEmbedBinding
     lateinit var wmImg: Bitmap
-    private val REQUEST_KEY = "wm_img" // 데이터 요청 키
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
@@ -29,20 +30,25 @@ class EmbedFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-    }
-
-    override fun onStart() {
-        super.onStart()
 
         // 이미지 수신
-        setFragmentResultListener(REQUEST_KEY) { key, bundle ->
+        @Suppress("DEPRECATION")
+        setFragmentResultListener("wm_img") { key, bundle ->
             val img: Bitmap? = bundle.getParcelable("wm_img")
             if (img != null) { // null이 아닐 때만 사용
                 wmImg = img
                 binding.ivWmImage.setImageBitmap(wmImg) // 이미지 iv에 배치
-            } else {
-                Toast.makeText(context, "워터마크 이미지 전송 실패", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        @Suppress("DEPRECATION")
+        setFragmentResultListener("qr_img") { key, bundle ->
+            val img: Bitmap? = bundle.getParcelable("qr_img")
+            if (img != null) { // null이 아닐 때만 사용
+                wmImg = img
+                binding.ivWmImage.setImageBitmap(wmImg) // 이미지 iv에 배치
             }
         }
     }
+
 }

@@ -1,5 +1,6 @@
 package com.example.transparentkey_aos
 
+import android.graphics.BitmapFactory
 import android.nfc.Tag
 import android.os.Bundle
 import android.util.Log
@@ -7,14 +8,21 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.setFragmentResultListener
 import com.example.transparentkey_aos.databinding.FragmentEmbedGenerateQrBinding
+import com.example.transparentkey_aos.retrofit2.ApiQRCode
 import com.example.transparentkey_aos.retrofit2.QRModel
-import com.example.transparentkey_aos.retrofit2.ResponseQRModel
+
 import com.example.transparentkey_aos.retrofit2.RetrofitClient
+import okhttp3.ResponseBody
 import retrofit2.Call
+import retrofit2.Callback
 import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 class EmbedGenerateQRFragment : Fragment() {
     lateinit var binding: FragmentEmbedGenerateQrBinding
@@ -55,26 +63,41 @@ class EmbedGenerateQRFragment : Fragment() {
      * 네트워크 요청을 시작한다.
      */
     private fun loadData() {
-        RetrofitClient.instance.sendQRData(QRModel(uid, date))
-            .enqueue(object : retrofit2.Callback<ResponseQRModel> {
-                override fun onResponse(
-                    call: Call<ResponseQRModel>,
-                    response: Response<ResponseQRModel>
-                ) {
-                    if (response.isSuccessful) {
-                        // 서버 응답 성공 처리
-                        Toast.makeText(context, "Success: ${response.body()?.message}", Toast.LENGTH_SHORT).show()
-                    } else {
-                        // 서버 응답 에러 처리
-                        Toast.makeText(context, "Error", Toast.LENGTH_SHORT).show()
+        RetrofitClient.instance.sendQRData(QRModel(uid, date)).enqueue(object : Callback<ResponseBody> {
+            override fun onResponse(
+                call: Call<ResponseBody>,
+                response: Response<ResponseBody>
+            ) {
+                if (response.isSuccessful) {
+                    Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show()
+                    // 이미지 데이터로부터 Bitmap 생성
+                    val imageStream = response.body()?.byteStream()
+                    val bitmap = BitmapFactory.decodeStream(imageStream)
+                    imageStream?.close()
+                    activity?.runOnUiThread {
+                        // 이미지 embed fragment로 전달
+                        setFragmentResult("qr_img", bundleOf("qr_img" to bitmap))
+                        replaceFragment(EmbedFragment())
                     }
-                }
+                } else {
+                    Toast.makeText(context, "Error", Toast.LENGTH_SHORT).show()
 
-                override fun onFailure(call: Call<ResponseQRModel>, t: Throwable) {
-                    // 통신 실패 처리
-                    Toast.makeText(context, "Failure: ${t.message}", Toast.LENGTH_SHORT).show()
-                    Log.d("tag", "Failure: ${t.message}")
                 }
-            })
+            }
+
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                Log.e("API_CALL", "Network call failed: ${t.message}")
+                Toast.makeText(context, "Network call failed: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+
+        })
+    }
+    /**
+     * fragment replace
+     */
+    private fun replaceFragment(fragment: Fragment) {
+        requireActivity().supportFragmentManager.beginTransaction()
+            .replace(R.id.fragmentCotainer, fragment)
+            .commit()
     }
 }

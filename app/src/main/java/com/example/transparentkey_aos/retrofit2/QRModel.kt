@@ -5,7 +5,7 @@ data class QRModel(
     val date: Int
 )
 
-data class ResponseQRModel(
+data class ResponseBody(
     val success: Boolean,
     val message: String
 )
