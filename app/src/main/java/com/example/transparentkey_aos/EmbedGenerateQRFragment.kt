@@ -30,6 +30,9 @@ class EmbedGenerateQRFragment : Fragment() {
             val strDate = bundle.getString("date", "dateVal")
             val formattedDate = strDate.replace(".", "")
             date = formattedDate.toInt()
+
+            // 데이터를 받은 후 네트워크 요청 시작
+            loadData()
 //            Toast.makeText(context, "id: $id    date: $date", Toast.LENGTH_SHORT).show()
         }
     }
@@ -45,7 +48,7 @@ class EmbedGenerateQRFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        loadData()
+
     }
 
     /**
