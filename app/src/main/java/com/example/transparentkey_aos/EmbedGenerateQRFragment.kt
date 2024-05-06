@@ -69,7 +69,7 @@ class EmbedGenerateQRFragment : Fragment() {
                 response: Response<ResponseBody>
             ) {
                 if (response.isSuccessful) {
-                    Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show()
+//                    Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show()
                     // 이미지 데이터로부터 Bitmap 생성
                     val imageStream = response.body()?.byteStream()
                     val bitmap = BitmapFactory.decodeStream(imageStream)
