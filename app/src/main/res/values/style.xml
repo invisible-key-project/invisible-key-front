@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  
+    <style name="noAnimBottomNavigationView">
+        <item name="android:animateLayoutChanges">false</item>
+        <item name="android:transitionGroup">false</item>
+    </style>
+
+    <style name="Widget.BottomNavigationView" parent="Widget.MaterialComponents.BottomNavigationView">
+        <item name="itemIconSize">25dp</item> <!-- 아이콘 크기 조정 -->
+        <item name="iconTint">@drawable/ic_color_selector</item>
+        <item name="itemTextAppearance">@style/MyBottomNavigationViewTextAppearance</item>
+        <item name="labelVisibilityMode">labeled</item> <!-- 항상 라벨 표시 -->
+        <item name="rippleColor">@color/transparent</item>
+    </style>
+
+    <style name="MyBottomNavigationViewTextAppearance" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="android:textSize">12sp</item> <!-- 텍스트 크기 조정 -->
+        <item name="android:textColor">@color/white</item>
+        <item name="fontFamily">@font/pretendard_medium</item>
+    </style>
+  
+</resources>
