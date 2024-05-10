@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="black">#17171b</color>
-    <color name="white">#F5F5F5</color>
+    <color name="white">#fafafa</color>
     <color name="titleBlue">#92B1FF</color>
+    <color name="gray">#A8A8A8</color>
     <color name="ic_grey">#5F5F5F</color>
     <color name="bn_text_grey">#666666</color>
     <color name="transparent">#00000000</color>

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".CertificationFragment2">
+
+    <TextView
+        android:id="@+id/cert2_title_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:text="워터마크 추출 결과"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/cert2_result_iv"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_marginTop="100dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cert2_title_tv" />
+
+    <TextView
+        android:id="@+id/cert2_title2_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="60dp"
+        android:layout_marginTop="60dp"
+        android:text="워터마크 데이터"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cert2_result_iv" />
+
+    <GridLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:columnCount="2"
+        app:layout_constraintStart_toStartOf="@id/cert2_title2_tv"
+        app:layout_constraintTop_toBottomOf="@id/cert2_title2_tv"
+        >
+
+        <TextView
+            android:text="이름: " />
+        <TextView
+            android:id="@+id/cert2_name_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="홍길동"
+            android:textSize="16sp"
+             />
+
+        <TextView
+            android:text="닉네임: "/>
+        <TextView
+            android:id="@+id/cert2_id_tv"
+            android:text="HongGildong"
+            android:textSize="16sp"/>
+
+        <TextView
+            android:text="삽입날짜:  "/>
+
+        <TextView
+            android:id="@+id/cert2_date_tv"
+            android:text="2000.00.00"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/cert2_title3_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:text="이미지 정보"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_columnSpan="2"/>
+
+        <TextView
+            android:text="훼손율: "/>
+
+        <TextView
+            android:id="@+id/cert2_image_result_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:text="10.00%"
+            android:textSize="16sp" />
+    </GridLayout>
+
+    <Button
+        android:id="@+id/cert2_end_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:text="홈으로 돌아가기"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cert2_image_result_tv" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
