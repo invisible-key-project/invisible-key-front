@@ -19,7 +19,7 @@ class MainFragment : Fragment() {
 
         binding.btnExtract.setOnClickListener {
             (context as MainActivity).supportFragmentManager.beginTransaction()
-                .replace(R.id.main, CertificationFragment1())
+                .replace(R.id.fragmentCotainer, CertificationFragment1())
                 .commitAllowingStateLoss()
         }
         return binding.root

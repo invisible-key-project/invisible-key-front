@@ -57,7 +57,7 @@ class CertificationFragment1 : Fragment() {
     }
 
     val retrofit = Retrofit.Builder()
-        .baseUrl("http://192.168.45.238:8000/") // 서버 URL
+        .baseUrl("http://192.168.45.122:8000/") // 서버 URL
         .addConverterFactory(GsonConverterFactory.create()) // JSON 변환기
         .build()
 
@@ -80,7 +80,7 @@ class CertificationFragment1 : Fragment() {
         }
         binding.cert1ExtractBtn.setOnClickListener {
             (context as MainActivity).supportFragmentManager.beginTransaction()
-                .replace(R.id.main, CertificationFragment2())
+                .replace(R.id.fragmentCotainer, CertificationFragment2())
                 .commitAllowingStateLoss()
         }
 
@@ -93,7 +93,7 @@ class CertificationFragment1 : Fragment() {
 
     fun returnToMainFragment() {
         (context as MainActivity).supportFragmentManager.beginTransaction()
-            .replace(R.id.main, MainFragment())
+            .replace(R.id.fragmentCotainer, MainFragment())
             .commitAllowingStateLoss()
     }
 

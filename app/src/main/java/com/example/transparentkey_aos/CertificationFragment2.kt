@@ -68,7 +68,7 @@ class CertificationFragment2 : Fragment() {
 
     fun returnToMainFragment() {
         (context as MainActivity).supportFragmentManager.beginTransaction()
-            .replace(R.id.main, MainFragment())
+            .replace(R.id.fragmentCotainer, MainFragment())
             .commitAllowingStateLoss()
     }
 
