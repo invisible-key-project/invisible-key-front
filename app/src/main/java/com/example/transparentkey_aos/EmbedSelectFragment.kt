@@ -90,6 +90,7 @@ class EmbedSelectFragment : Fragment() {
     fun replaceFragment(fragment: Fragment, img: Bitmap) {
         // 데이터 전송
         setFragmentResult(REQUEST_KEY, bundleOf("selected_img" to img))
+        setFragmentResult("selected_embed_img", bundleOf("selected_embed_img" to img)) //embed fragment로 넘겨줄 리스너
 
         requireActivity().supportFragmentManager.beginTransaction()
             .replace(R.id.fragmentCotainer, fragment)

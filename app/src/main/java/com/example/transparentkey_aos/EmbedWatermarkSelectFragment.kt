@@ -43,8 +43,9 @@ class EmbedWatermarkSelectFragment : Fragment() {
             showDialog()
         }
         binding.btnImg.setOnClickListener {
-            setFragmentResult("wmSelection", bundleOf("selection" to 2))
-            replaceFragment(EmbedImageSelectFragment())
+//            setFragmentResult("wmSelection", bundleOf("selection" to 2))
+//            replaceFragment(EmbedImageSelectFragment())
+            Toast.makeText(context, "개발 중입니다.", Toast.LENGTH_SHORT).show()
         }
     }
 

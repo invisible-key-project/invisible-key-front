@@ -13,13 +13,14 @@ import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.setFragmentResultListener
 import com.example.transparentkey_aos.databinding.FragmentEmbedDialogBinding
 import com.example.transparentkey_aos.databinding.FragmentEmbedSelectBinding
+import java.text.SimpleDateFormat
 import java.util.Date
 
 class EmbedDialogFragment : DialogFragment() {
     private lateinit var binding: FragmentEmbedDialogBinding
-    private lateinit var id: String
+    private var id: Int = 0
     private lateinit var name: String
-    private lateinit var date: String
+    private var date: Int = 0
 
         override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,13 +39,17 @@ class EmbedDialogFragment : DialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        id = "12345678"
+        id = 12345678
         name = "홍길동"
-        date = "24.03.23."
 
-        binding.tvDlIdRes.text = id
+        val stringDate = getCurrentDateFormatted() // get current time
+        val formattedDate = formatDateStringUsingChunk(stringDate) // formatting date
+        date = stringDate.toInt()
+
+
+        binding.tvDlIdRes.text = id.toString()
         binding.tvDlNameRes.text = name
-        binding.tvDlDateRes.text = date
+        binding.tvDlDateRes.text = formattedDate
 
         binding.btnDlConfirm.setOnClickListener {
             setFragmentResult("qrData", bundleOf("id" to id, "date" to date))
@@ -72,6 +77,23 @@ class EmbedDialogFragment : DialogFragment() {
         requireActivity().supportFragmentManager.beginTransaction()
             .replace(R.id.fragmentCotainer, fragment)
             .commit()
+    }
+
+    /**
+     * get Current Date
+     */
+
+    fun getCurrentDateFormatted(): String {
+        val dateFormat = SimpleDateFormat("yyMMdd")
+        val currentDate = Date() // 현재 날짜와 시간을 가져옴
+        return dateFormat.format(currentDate) // 'yyMMdd' 형식으로 날짜를 포맷
+    }
+
+    /**
+     * chunk date string
+     */
+    fun formatDateStringUsingChunk(dateStr: String): String {
+        return dateStr.chunked(2).joinToString(separator = ".")
     }
 
 }
