@@ -8,9 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.setFragmentResultListener
 import com.example.transparentkey_aos.databinding.FragmentEmbedBinding
 import com.example.transparentkey_aos.retrofit2.QRModel
@@ -58,17 +56,21 @@ class EmbedFragment : Fragment() {
                         if (img != null) { // null이 아닐 때만 사용
                             wmImg = img
                             binding.ivWmImage.setImageBitmap(wmImg) // 이미지 iv에 배치
+                        } else {
+                            Toast.makeText(context, "워터마크 이미지를 불러오는데 실패했습니다.", Toast.LENGTH_SHORT).show()
                         }
                     }
                     // 워터마크 할 이미지 수신
                     @Suppress("DEPRECATION")
                     setFragmentResultListener("selected_embed_img") { key, bundle ->
-                        // 이미지 수신 안 되는 오류 : 다른 키 사용으로 해결
                         val img: Bitmap? = bundle.getParcelable("selected_embed_img")
                         if (img != null) { // null이 아닐 때만 사용
                             selected_img = img
 //                binding.ivWmImage.setImageBitmap(selected_img)
                             uploadImages(selected_img, wmImg)
+                        }else {
+                            // img가 null인 경우의 처리 로직
+                            Toast.makeText(context, "배경 이미지를 불러오는데 실패했습니다.", Toast.LENGTH_SHORT).show()
                         }
                     }
 
@@ -76,13 +78,15 @@ class EmbedFragment : Fragment() {
 
                 2 -> {
                     // img
-                    // 이미지 수신
+                    // 워터마크 이미지 수신
                     @Suppress("DEPRECATION")
                     setFragmentResultListener("wm_img2") { key, bundle ->
                         val img: Bitmap? = bundle.getParcelable("wm_img2")
                         if (img != null) { // null이 아닐 때만 사용
                             wmImg = img
                             binding.ivWmImage.setImageBitmap(wmImg) // 이미지 iv에 배치
+                        } else {
+                            Toast.makeText(context, "워터마크 이미지를 불러오는데 실패했습니다.", Toast.LENGTH_SHORT).show()
                         }
                     }
                     // 워터마크 할 배경 이미지 수신
@@ -110,6 +114,10 @@ class EmbedFragment : Fragment() {
     }
 
     private fun uploadImages(background_img: Bitmap, wm_img: Bitmap?) {
+        if (!::wmImg.isInitialized) {
+            Toast.makeText(context, "워터마크 이미지가 설정되지 않았습니다.", Toast.LENGTH_SHORT).show()
+            return
+        }
         val stream1 = ByteArrayOutputStream()
         background_img.compress(Bitmap.CompressFormat.JPEG, 100, stream1)
         val byteArray1 = stream1.toByteArray()
