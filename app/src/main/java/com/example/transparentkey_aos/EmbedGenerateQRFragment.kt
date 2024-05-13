@@ -34,10 +34,8 @@ class EmbedGenerateQRFragment : Fragment() {
         // dialog로부터 QR에 넣을 정보를 받는다.
         setFragmentResultListener("qrData") { requestKey, bundle ->
             // string -> int로 형변환
-            uid = bundle.getString("id", "idVal").toInt()
-            val strDate = bundle.getString("date", "dateVal")
-            val formattedDate = strDate.replace(".", "")
-            date = formattedDate.toInt()
+            uid = bundle.getInt("id", 0)
+            date = bundle.getInt("date", 0)
 
             // 데이터를 받은 후 네트워크 요청 시작
             loadData()
