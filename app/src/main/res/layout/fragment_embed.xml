@@ -20,13 +20,27 @@
 
     <ImageView
         android:id="@+id/iv_wm_image"
-        android:layout_height="230dp"
-        android:layout_width="230dp"
-        android:layout_marginTop="32dp"
+        android:layout_width="290dp"
+        android:layout_height="290dp"
+        android:layout_marginTop="10dp"
         android:layout_marginBottom="110dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_embed_watermark" />
+
+    <Button
+        android:id="@+id/btn_save_img"
+        android:layout_width="75dp"
+        android:layout_height="45dp"
+        android:layout_marginTop="32dp"
+        android:fontFamily="@font/pretendard_medium"
+        android:text="저장"
+        android:textSize="13dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:visibility="invisible"
+        android:enabled="false"
+        app:layout_constraintTop_toBottomOf="@+id/iv_wm_image" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

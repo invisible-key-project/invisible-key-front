@@ -1,8 +1,11 @@
 package com.example.transparentkey_aos
 
+import android.content.ContentValues
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.os.Environment
+import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -26,6 +29,7 @@ class EmbedFragment : Fragment() {
     lateinit var binding: FragmentEmbedBinding
     lateinit var wmImg: Bitmap
     lateinit var selected_img:Bitmap
+    var bitmap: Bitmap? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -110,6 +114,13 @@ class EmbedFragment : Fragment() {
             }
         }
 
+        // save button click listener
+        binding.btnSaveImg.setOnClickListener {
+            bitmap?.let { safeBitmap -> // null 검사
+                saveImageToStorage(safeBitmap)
+            } ?: Toast.makeText(context, "이미지가 존재하지 않습니다.", Toast.LENGTH_SHORT).show()
+        }
+
 
     }
 
@@ -139,14 +150,17 @@ class EmbedFragment : Fragment() {
                 response: Response<ResponseBody>
             ) {
                 if (response.isSuccessful) {
-                    Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show()
+//                    Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show()
                     // 이미지 업로드 성공 시 처리
                     val inputStream = response.body()?.byteStream()
-                    val bitmap = BitmapFactory.decodeStream(inputStream)
+                    bitmap = BitmapFactory.decodeStream(inputStream)
                     inputStream?.close()
                     activity?.runOnUiThread {
+                        // view에 배치
                         binding.ivWmImage.setImageBitmap(bitmap)
                         binding.tvEmbedWatermark.text = "워터마킹 완료!"
+                        binding.btnSaveImg.visibility = View.VISIBLE
+                        binding.btnSaveImg.isEnabled = true
                     }
                 } else {
                     Toast.makeText(context, "Error", Toast.LENGTH_SHORT).show()
@@ -161,5 +175,26 @@ class EmbedFragment : Fragment() {
 
         })
     }
+
+    // Save watermarked image
+    fun saveImageToStorage(bitmap: Bitmap) {
+        val appName = getString(R.string.app_name)  // 앱 이름 가져오기
+        val filename = "watermarked_${System.currentTimeMillis()}.jpg"
+        val contentValues = ContentValues().apply {
+            put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
+            put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
+            put(MediaStore.MediaColumns.RELATIVE_PATH, "${Environment.DIRECTORY_PICTURES}/$appName")  // 경로 설정
+        }
+
+        val resolver = context?.contentResolver
+        val uri = resolver?.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+        uri?.let {
+            resolver.openOutputStream(it)?.use { outputStream ->
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
+                Toast.makeText(context, "이미지 저장 성공: $filename", Toast.LENGTH_LONG).show()
+            } ?: Toast.makeText(context, "파일을 저장할 수 없습니다.", Toast.LENGTH_SHORT).show()
+        } ?: Toast.makeText(context, "이미지 저장 실패", Toast.LENGTH_SHORT).show()
+    }
+
 
 }
