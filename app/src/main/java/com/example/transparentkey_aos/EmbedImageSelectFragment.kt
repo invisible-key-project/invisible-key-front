@@ -53,7 +53,7 @@ class EmbedImageSelectFragment : Fragment() {
 
                 // 다음 다이얼로그로 전환
                 setFragmentResult(REQUEST_KEY, bundleOf("wm_img" to selectedWatermark))
-                setFragmentResult("wm_img_2", bundleOf("wm_img_2" to selectedWatermark))
+                setFragmentResult("wmimg_embed", bundleOf("wmimg_embed" to selectedWatermark))
                 showImgDialog()
             } catch (e: Exception) {
                 Log.e("EmbedImageSelectFragment", "Image selection failed", e)

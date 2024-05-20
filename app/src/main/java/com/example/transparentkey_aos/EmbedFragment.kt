@@ -52,8 +52,8 @@ class EmbedFragment : Fragment() {
         setFragmentResultListener("wmSelection") { key, bundle ->
             val selection = bundle.getInt("selection", -1)
             when (selection) {
+                // qr 선택한 경우 실행
                 1 -> {
-                    // qr 선택한 경우 실행
                     @Suppress("DEPRECATION")
                     setFragmentResultListener("qr_img") { key, bundle ->
                         val img: Bitmap? = bundle.getParcelable("qr_img")
@@ -80,12 +80,12 @@ class EmbedFragment : Fragment() {
 
                 }
 
+                // img
+                // 워터마크 이미지 수신
                 2 -> {
-                    // img
-                    // 워터마크 이미지 수신
                     @Suppress("DEPRECATION")
-                    setFragmentResultListener("wm_img2") { key, bundle ->
-                        val img: Bitmap? = bundle.getParcelable("wm_img2")
+                    setFragmentResultListener("wmimg_embed") { key, bundle ->
+                        val img: Bitmap? = bundle.getParcelable("wmimg_embed")
                         if (img != null) { // null이 아닐 때만 사용
                             wmImg = img
                             binding.ivWmImage.setImageBitmap(wmImg) // 이미지 iv에 배치
@@ -93,6 +93,7 @@ class EmbedFragment : Fragment() {
                             Toast.makeText(context, "워터마크 이미지를 불러오는데 실패했습니다.", Toast.LENGTH_SHORT).show()
                         }
                     }
+
                     // 워터마크 할 배경 이미지 수신
                     @Suppress("DEPRECATION")
                     setFragmentResultListener("selected_embed_img") { key, bundle ->
@@ -124,6 +125,9 @@ class EmbedFragment : Fragment() {
 
     }
 
+    /**
+     * Apply watermark
+     */
     private fun uploadImages(background_img: Bitmap, wm_img: Bitmap?) {
         if (!::wmImg.isInitialized) {
             Toast.makeText(context, "워터마크 이미지가 설정되지 않았습니다.", Toast.LENGTH_SHORT).show()
@@ -163,7 +167,7 @@ class EmbedFragment : Fragment() {
                         binding.btnSaveImg.isEnabled = true
                     }
                 } else {
-                    Toast.makeText(context, "Error", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Error : 워터마킹 실패", Toast.LENGTH_SHORT).show()
 
                 }
             }
@@ -176,7 +180,9 @@ class EmbedFragment : Fragment() {
         })
     }
 
-    // Save watermarked image
+    /**
+     * Save watermarked image
+     */
     fun saveImageToStorage(bitmap: Bitmap) {
         val appName = getString(R.string.app_name)  // 앱 이름 가져오기
         val filename = "watermarked_${System.currentTimeMillis()}.jpg"
