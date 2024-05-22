@@ -194,6 +194,7 @@ class EmbedSelectFragment : Fragment() {
     fun replaceFragment(fragment: Fragment, imgPath: String?) {
         // 데이터 전송
         setFragmentResult(REQUEST_KEY, bundleOf("selected_img_path" to imgPath))
+        setFragmentResult("selected_embed_img_path", bundleOf("selected_embed_img_path" to imgPath))
 
         requireActivity().supportFragmentManager.beginTransaction()
             .replace(R.id.fragmentContainer, fragment)

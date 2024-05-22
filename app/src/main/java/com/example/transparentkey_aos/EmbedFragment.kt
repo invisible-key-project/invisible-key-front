@@ -47,14 +47,14 @@ class EmbedFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         // 워터마크 할 이미지 수신
-        @Suppress("DEPRECATION")
         setFragmentResultListener("selected_embed_img_path") { key, bundle ->
             val filePath = bundle.getString("selected_embed_img_path")
-            if (filePath != null) { // null이 아닐 때만 사용
+            if (filePath != null) {
                 selected_img_path = filePath
+                Log.d("fraglog", "selected_img_path initialized: $selected_img_path")
             } else {
-                // img가 null인 경우의 처리 로직
                 Toast.makeText(context, "선택한 이미지 경로를 불러오는데 실패했습니다.", Toast.LENGTH_SHORT).show()
             }
         }
@@ -65,19 +65,20 @@ class EmbedFragment : Fragment() {
             when (selection) {
                 // qr 선택한 경우 실행
                 1 -> {
-                    @Suppress("DEPRECATION")
                     setFragmentResultListener("qr_img") { key, bundle ->
                         val img: Bitmap? = bundle.getParcelable("qr_img")
-                        if (img != null) { // null이 아닐 때만 사용
+                        if (img != null) {
                             wmImg = img
-                            binding.ivWmImage.setImageBitmap(wmImg) // 이미지 iv에 배치
+                            binding.ivWmImage.setImageBitmap(wmImg)
 
-                            // 파일에서 이미지 불러오기
-                            val selected_img = BitmapFactory.decodeFile(selected_img_path)
-                            uploadImages(selected_img, wmImg) // 서버에 업로드
+                            if (::selected_img_path.isInitialized) {
+                                val selected_img = BitmapFactory.decodeFile(selected_img_path)
+                                uploadImages(selected_img, wmImg)
+                            } else {
+                                Toast.makeText(context, "이미지 경로가 초기화되지 않았습니다.", Toast.LENGTH_SHORT).show()
+                            }
                         } else {
-                            Toast.makeText(context, "워터마크 이미지를 불러오는데 실패했습니다.", Toast.LENGTH_SHORT)
-                                .show()
+                            Toast.makeText(context, "워터마크 이미지를 불러오는데 실패했습니다.", Toast.LENGTH_SHORT).show()
                         }
                     }
                 }
@@ -85,26 +86,25 @@ class EmbedFragment : Fragment() {
                 // img
                 // 워터마크 이미지 수신
                 2 -> {
-                    @Suppress("DEPRECATION")
                     setFragmentResultListener("wmimg_embed") { key, bundle ->
                         val img: Bitmap? = bundle.getParcelable("wmimg_embed")
-                        if (img != null) { // null이 아닐 때만 사용
+                        if (img != null) {
                             wmImg = img
-                            binding.ivWmImage.setImageBitmap(wmImg) // 이미지 iv에 배치
+                            binding.ivWmImage.setImageBitmap(wmImg)
 
-                            // 파일에서 이미지 불러오기
-                            val selected_img = BitmapFactory.decodeFile(selected_img_path)
-                            // 서버에 업로드
-                            uploadImages(selected_img, wmImg)
+                            if (::selected_img_path.isInitialized) {
+                                val selected_img = BitmapFactory.decodeFile(selected_img_path)
+                                uploadImages(selected_img, wmImg)
+                            } else {
+                                Toast.makeText(context, "이미지 경로가 초기화되지 않았습니다.", Toast.LENGTH_SHORT).show()
+                            }
                         } else {
-                            Toast.makeText(context, "워터마크 이미지를 불러오는데 실패했습니다.", Toast.LENGTH_SHORT)
-                                .show()
+                            Toast.makeText(context, "워터마크 이미지를 불러오는데 실패했습니다.", Toast.LENGTH_SHORT).show()
                         }
                     }
                 }
 
                 else -> {
-                    // 예외 처리
                     Toast.makeText(context, "버튼 선택 결과 전송 실패", Toast.LENGTH_SHORT).show()
                 }
             }
@@ -112,13 +112,12 @@ class EmbedFragment : Fragment() {
 
         // save button click listener
         binding.btnSaveImg.setOnClickListener {
-            bitmap?.let { safeBitmap -> // null 검사
+            bitmap?.let { safeBitmap ->
                 saveImageToStorage(safeBitmap)
             } ?: Toast.makeText(context, "이미지가 존재하지 않습니다.", Toast.LENGTH_SHORT).show()
         }
-
-
     }
+
 
     /**
      * Apply watermark
