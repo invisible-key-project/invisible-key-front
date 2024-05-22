@@ -23,7 +23,7 @@
         android:id="@+id/bottomNavigationView"
         android:layout_width="match_parent"
         android:layout_height="80dp"
-        android:paddingVertical="5dp"
+        android:paddingVertical="7dp"
         app:itemIconTint="@color/ic_grey"
         app:itemTextColor="@color/bn_text_grey"
         android:background="@color/white"
