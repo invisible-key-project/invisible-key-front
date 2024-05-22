@@ -28,7 +28,7 @@ import java.io.ByteArrayOutputStream
 class EmbedFragment : Fragment() {
     lateinit var binding: FragmentEmbedBinding
     lateinit var wmImg: Bitmap
-    lateinit var selected_img:Bitmap
+    lateinit var selected_img_path: String
     var bitmap: Bitmap? = null
 
 
@@ -47,6 +47,17 @@ class EmbedFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        // 워터마크 할 이미지 수신
+        @Suppress("DEPRECATION")
+        setFragmentResultListener("selected_embed_img_path") { key, bundle ->
+            val filePath = bundle.getString("selected_embed_img_path")
+            if (filePath != null) { // null이 아닐 때만 사용
+                selected_img_path = filePath
+            } else {
+                // img가 null인 경우의 처리 로직
+                Toast.makeText(context, "선택한 이미지 경로를 불러오는데 실패했습니다.", Toast.LENGTH_SHORT).show()
+            }
+        }
 
         // type 수신
         setFragmentResultListener("wmSelection") { key, bundle ->
@@ -60,24 +71,15 @@ class EmbedFragment : Fragment() {
                         if (img != null) { // null이 아닐 때만 사용
                             wmImg = img
                             binding.ivWmImage.setImageBitmap(wmImg) // 이미지 iv에 배치
-                        } else {
-                            Toast.makeText(context, "워터마크 이미지를 불러오는데 실패했습니다.", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                    // 워터마크 할 이미지 수신
-                    @Suppress("DEPRECATION")
-                    setFragmentResultListener("selected_embed_img") { key, bundle ->
-                        val img: Bitmap? = bundle.getParcelable("selected_embed_img")
-                        if (img != null) { // null이 아닐 때만 사용
-                            selected_img = img
-//                binding.ivWmImage.setImageBitmap(selected_img)
-                            uploadImages(selected_img, wmImg)
-                        }else {
-                            // img가 null인 경우의 처리 로직
-                            Toast.makeText(context, "배경 이미지를 불러오는데 실패했습니다.", Toast.LENGTH_SHORT).show()
-                        }
-                    }
 
+                            // 파일에서 이미지 불러오기
+                            val selected_img = BitmapFactory.decodeFile(selected_img_path)
+                            uploadImages(selected_img, wmImg) // 서버에 업로드
+                        } else {
+                            Toast.makeText(context, "워터마크 이미지를 불러오는데 실패했습니다.", Toast.LENGTH_SHORT)
+                                .show()
+                        }
+                    }
                 }
 
                 // img
@@ -89,23 +91,16 @@ class EmbedFragment : Fragment() {
                         if (img != null) { // null이 아닐 때만 사용
                             wmImg = img
                             binding.ivWmImage.setImageBitmap(wmImg) // 이미지 iv에 배치
-                        } else {
-                            Toast.makeText(context, "워터마크 이미지를 불러오는데 실패했습니다.", Toast.LENGTH_SHORT).show()
-                        }
-                    }
 
-                    // 워터마크 할 배경 이미지 수신
-                    @Suppress("DEPRECATION")
-                    setFragmentResultListener("selected_embed_img") { key, bundle ->
-                        // 이미지 수신 안 되는 오류 : 다른 키 사용으로 해결
-                        val img: Bitmap? = bundle.getParcelable("selected_embed_img")
-                        if (img != null) { // null이 아닐 때만 사용
-                            selected_img = img
-//                            binding.ivWmImage.setImageBitmap(selected_img)
+                            // 파일에서 이미지 불러오기
+                            val selected_img = BitmapFactory.decodeFile(selected_img_path)
+                            // 서버에 업로드
                             uploadImages(selected_img, wmImg)
+                        } else {
+                            Toast.makeText(context, "워터마크 이미지를 불러오는데 실패했습니다.", Toast.LENGTH_SHORT)
+                                .show()
                         }
                     }
-
                 }
 
                 else -> {
@@ -142,7 +137,8 @@ class EmbedFragment : Fragment() {
         val byteArray2 = stream2.toByteArray()
 
         val requestFile1 = RequestBody.create(MediaType.parse("image/jpeg"), byteArray1)
-        val body1 = MultipartBody.Part.createFormData("background_img", "background_img.jpg", requestFile1)
+        val body1 =
+            MultipartBody.Part.createFormData("background_img", "background_img.jpg", requestFile1)
 
         val requestFile2 = RequestBody.create(MediaType.parse("image/png"), byteArray2)
         val body2 = MultipartBody.Part.createFormData("wm_img", "wm_img.png", requestFile2)
@@ -174,7 +170,8 @@ class EmbedFragment : Fragment() {
 
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
                 Log.e("API_CALL", "Network call failed: ${t.message}")
-                Toast.makeText(context, "Network call failed: ${t.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Network call failed: ${t.message}", Toast.LENGTH_SHORT)
+                    .show()
             }
 
         })
@@ -189,7 +186,10 @@ class EmbedFragment : Fragment() {
         val contentValues = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
             put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
-            put(MediaStore.MediaColumns.RELATIVE_PATH, "${Environment.DIRECTORY_PICTURES}/$appName")  // 경로 설정
+            put(
+                MediaStore.MediaColumns.RELATIVE_PATH,
+                "${Environment.DIRECTORY_PICTURES}/$appName"
+            )  // 경로 설정
         }
 
         val resolver = context?.contentResolver

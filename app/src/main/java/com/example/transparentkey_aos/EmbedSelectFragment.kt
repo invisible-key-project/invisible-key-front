@@ -1,11 +1,16 @@
 package com.example.transparentkey_aos
 
 
+import android.content.Context
 import android.content.Intent
+import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
+import android.media.ExifInterface
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
@@ -21,6 +26,8 @@ import androidx.fragment.app.setFragmentResult
 import androidx.work.*
 import com.example.transparentkey_aos.databinding.FragmentEmbedSelectBinding
 import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -31,7 +38,7 @@ class EmbedSelectFragment : Fragment() {
     val REQUEST_IMAGE_CAPTURE = 1 // 카메라 사진 촬영 요청 코드
     private lateinit var photoFile: File // 파일 생성 시 사용
     private lateinit var selectedImg: Bitmap
-    private val REQUEST_KEY = "selected_img" // 요청 키
+    private val REQUEST_KEY = "selected_img_path" // 요청 키
     lateinit var curPhotoPath: String // 문자열 형태 사진 경로 값
     private var launcher = registerForActivityResult(ActivityResultContracts.GetContent()) { it ->
         setGallery(uri = it)
@@ -69,25 +76,28 @@ class EmbedSelectFragment : Fragment() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == AppCompatActivity.RESULT_OK) {
             val imageBitmap = BitmapFactory.decodeFile(photoFile.absolutePath)
+            val rotatedBitmap = rotateImageIfRequired(imageBitmap, photoFile.absolutePath) // 필요시 회전
 
-            binding.ivCam.setImageBitmap(imageBitmap)
-            selectedImg = imageBitmap
+            binding.ivCam.setImageBitmap(rotatedBitmap)
+            selectedImg = rotatedBitmap
+
+            // 비트맵을 파일로 저장
+            val filePath = saveBitmapToFile(rotatedBitmap, "selected_img.png")
+
             scheduleFileDeletion(photoFile) // 파일 삭제 작업 예약
-            replaceFragment(EmbedWatermarkSelectFragment(), selectedImg)
+            replaceFragment(EmbedWatermarkSelectFragment(), filePath) // 사진의 경로 전송
         }
     }
 
     /**
-     * 갤러리 실행, selectedWatermark에 bitmap으로 저장
+     * 갤러리 실행, imgPath에 파일 경로 저장
      */
     fun setGallery(uri: Uri?) {
         uri?.let {
             try {
-                val inputStream = requireActivity().contentResolver.openInputStream(uri)
-                selectedImg = BitmapFactory.decodeStream(inputStream)
-
+                val imgPath = getRealPathFromURI(requireContext(), uri)
                 // 다음 프래그먼트로 전환
-                replaceFragment(EmbedWatermarkSelectFragment(), selectedImg)
+                replaceFragment(EmbedWatermarkSelectFragment(), imgPath)
             } catch (e: Exception) {
                 Log.e("EmbedImageSelectFragment", "Image selection failed", e)
             }
@@ -95,12 +105,28 @@ class EmbedSelectFragment : Fragment() {
     }
 
     /**
+     * get img Path from URI
+     */
+    private fun getRealPathFromURI(context: Context, uri: Uri): String? {
+        var filePath: String? = null
+        val proj = arrayOf(MediaStore.Images.Media.DATA)
+        val cursor: Cursor? = context.contentResolver.query(uri, proj, null, null, null)
+        cursor?.use {
+            if (it.moveToFirst()) {
+                val columnIndex = it.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
+                filePath = it.getString(columnIndex)
+            }
+        }
+        return filePath
+    }
+
+    /**
      * replace fragment
      */
-    fun replaceFragment(fragment: Fragment, img: Bitmap) {
+    fun replaceFragment(fragment: Fragment, imgPath: String?) {
         // 데이터 전송
-        setFragmentResult(REQUEST_KEY, bundleOf("selected_img" to img))
-        setFragmentResult("selected_embed_img", bundleOf("selected_embed_img" to img)) //embed fragment로 넘겨줄 리스너
+        setFragmentResult(REQUEST_KEY, bundleOf("selected_img_path" to imgPath))
+        setFragmentResult("selected_embed_img_path", bundleOf("selected_embed_img_path" to imgPath)) //embed fragment로 넘겨줄 리스너
 
         requireActivity().supportFragmentManager.beginTransaction()
             .replace(R.id.fragmentCotainer, fragment)
@@ -138,5 +164,57 @@ class EmbedSelectFragment : Fragment() {
             .build()
 
         WorkManager.getInstance(requireContext()).enqueue(deleteRequest)
+    }
+
+    /**
+     * if Required, call Rotate Image
+     */
+    fun rotateImageIfRequired(img: Bitmap, selectedImage: String): Bitmap {
+        // ExifInterface를 사용해 이미지 파일의 EXIF 메타데이터를 읽어옴
+        val ei: ExifInterface = try {
+            ExifInterface(selectedImage)
+        } catch (e: IOException) {
+            e.printStackTrace()
+            return img // 예외 발생 시 원본 이미지를 반환
+        }
+
+        // EXIF에서 방향 정보를 가져옴
+        val orientation: Int = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
+
+        // 방향 정보에 따라 이미지를 회전시킴
+        return when (orientation) {
+            ExifInterface.ORIENTATION_ROTATE_90 -> rotateImage(img, 90f)
+            ExifInterface.ORIENTATION_ROTATE_180 -> rotateImage(img, 180f)
+            ExifInterface.ORIENTATION_ROTATE_270 -> rotateImage(img, 270f)
+            else -> img // 회전이 필요 없는 경우 원본 이미지를 반환
+        }
+    }
+
+    /**
+     * Rotate Img
+     */
+    private fun rotateImage(img: Bitmap, degree: Float): Bitmap {
+        // Matrix 객체를 생성하여 회전 변환을 적용
+        val matrix = Matrix()
+        matrix.postRotate(degree)
+        // 회전된 비트맵을 생성하여 반환
+        return Bitmap.createBitmap(img, 0, 0, img.width, img.height, matrix, true)
+    }
+
+    /**
+     * Save Bitmap To File
+     */
+    fun saveBitmapToFile(bitmap: Bitmap, fileName: String): String {
+        val storageDir = requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        val imageFile = File(storageDir, fileName)
+        try {
+            val fos = FileOutputStream(imageFile)
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
+            fos.flush()
+            fos.close()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+        return imageFile.absolutePath
     }
 }

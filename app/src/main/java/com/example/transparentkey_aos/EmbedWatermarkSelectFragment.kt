@@ -1,6 +1,7 @@
 package com.example.transparentkey_aos
 
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.ColorFilter
 import android.graphics.PorterDuff
@@ -18,8 +19,7 @@ import com.example.transparentkey_aos.databinding.FragmentEmbedSelectBinding
 
 class EmbedWatermarkSelectFragment : Fragment() {
     lateinit var binding: FragmentEmbedWatermarkSelectBinding
-    lateinit var selectedImg: Bitmap
-    private val REQUEST_KEY = "selected_img" // 데이터 요청 키
+    private val REQUEST_KEY = "selected_img_path" // 데이터 요청 키
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,7 +45,6 @@ class EmbedWatermarkSelectFragment : Fragment() {
         binding.btnImg.setOnClickListener {
             setFragmentResult("wmSelection", bundleOf("selection" to 2))
             replaceFragment(EmbedImageSelectFragment())
-//            Toast.makeText(context, "개발 중입니다.", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -55,10 +54,11 @@ class EmbedWatermarkSelectFragment : Fragment() {
         // 이미지 수신
         @Suppress("DEPRECATION")
         setFragmentResultListener(REQUEST_KEY) { key, bundle ->
-            val img: Bitmap? = bundle.getParcelable("selected_img")
-            if (img != null) { // null이 아닐 때만 사용
-                selectedImg = img
-                binding.ivSelected.setImageBitmap(selectedImg) // 이미지 iv에 배치
+            val filePath = bundle.getString("selected_img_path")
+            if (filePath != null) { // null이 아닐 때만 사용
+                // 파일에서 이미지 불러오기
+                val bitmap = BitmapFactory.decodeFile(filePath)
+                binding.ivSelected.setImageBitmap(bitmap) // 이미지 iv에 배치
             }
         }
     }
