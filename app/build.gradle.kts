@@ -55,4 +55,5 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation ("com.google.code.gson:gson:2.8.6")
+    implementation("androidx.work:work-runtime-ktx:2.7.1") // worker manager : 내부저장소 사진 자동 삭제
 }

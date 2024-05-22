@@ -14,14 +14,22 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.FileProvider
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
+import androidx.work.*
 import com.example.transparentkey_aos.databinding.FragmentEmbedSelectBinding
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.concurrent.TimeUnit
 
 class EmbedSelectFragment : Fragment() {
     lateinit var binding: FragmentEmbedSelectBinding
     val REQUEST_IMAGE_CAPTURE = 1 // 카메라 사진 촬영 요청 코드
+    private lateinit var photoFile: File // 파일 생성 시 사용
     private lateinit var selectedImg: Bitmap
     private val REQUEST_KEY = "selected_img" // 요청 키
     lateinit var curPhotoPath: String // 문자열 형태 사진 경로 값
@@ -41,10 +49,12 @@ class EmbedSelectFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-//        Toast.makeText(context, "select fragment", Toast.LENGTH_SHORT).show()
         binding.btnCam.setOnClickListener {
             // 카메라 실행
-            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)//.also {
+            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+            photoFile = createImageFile()
+            val photoURI = FileProvider.getUriForFile(requireContext(), "com.example.transparentkey_aos.fileprovider", photoFile)
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
             startActivityForResult(intent, REQUEST_IMAGE_CAPTURE)
         }
         binding.btnPhotos.setOnClickListener {
@@ -58,12 +68,12 @@ class EmbedSelectFragment : Fragment() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == AppCompatActivity.RESULT_OK) {
-            val imageBitmap = data?.extras?.get("data") as Bitmap
+            val imageBitmap = BitmapFactory.decodeFile(photoFile.absolutePath)
 
             binding.ivCam.setImageBitmap(imageBitmap)
             selectedImg = imageBitmap
+            scheduleFileDeletion(photoFile) // 파일 삭제 작업 예약
             replaceFragment(EmbedWatermarkSelectFragment(), selectedImg)
-
         }
     }
 
@@ -96,5 +106,37 @@ class EmbedSelectFragment : Fragment() {
             .replace(R.id.fragmentCotainer, fragment)
             .addToBackStack(null)
             .commit()
+    }
+
+    /**
+     * Create Image File at Internal Storage
+     */
+    private fun createImageFile(): File {
+        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.KOREA).format(Date())
+        val storageDir: File = requireContext().filesDir
+        return File.createTempFile(
+            "PNG_${timeStamp}_",
+            ".png",
+            storageDir
+        ).apply {
+            // 파일 생성 시간을 저장
+            setLastModified(System.currentTimeMillis())
+        }
+    }
+
+    /**
+     * delete temp img automatically (15min)
+     */
+    private fun scheduleFileDeletion(file: File) {
+        val data = Data.Builder()
+            .putString("file_path", file.absolutePath)
+            .build()
+
+        val deleteRequest = OneTimeWorkRequestBuilder<DeleteFileWorker>()
+            .setInitialDelay(15, TimeUnit.MINUTES) // 15분 후 삭제
+            .setInputData(data)
+            .build()
+
+        WorkManager.getInstance(requireContext()).enqueue(deleteRequest)
     }
 }
