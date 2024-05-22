@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.graphics.ColorFilter
 import android.graphics.PorterDuff
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -16,6 +17,7 @@ import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.setFragmentResultListener
 import com.example.transparentkey_aos.databinding.FragmentEmbedWatermarkSelectBinding
 import com.example.transparentkey_aos.databinding.FragmentEmbedSelectBinding
+import java.io.File
 
 class EmbedWatermarkSelectFragment : Fragment() {
     lateinit var binding: FragmentEmbedWatermarkSelectBinding
@@ -33,6 +35,27 @@ class EmbedWatermarkSelectFragment : Fragment() {
         binding = FragmentEmbedWatermarkSelectBinding.inflate(inflater, container, false)
 
 //        Toast.makeText(context, "watermark select fragment", Toast.LENGTH_SHORT).show()
+        // 이미지 수신
+        // 이미지 경로를 가져와서 이미지뷰에 설정
+        parentFragmentManager.setFragmentResultListener(REQUEST_KEY, this) { _, bundle ->
+            val imgPath = bundle.getString("selected_img_path")
+            Log.d("fraglog", "onCreateView: imgPath = $imgPath")
+            imgPath?.let {
+                val file = File(it)
+                if (file.exists()) {
+                    Log.d("fraglog", "File exists: $it")
+                    val bitmap = BitmapFactory.decodeFile(it)
+                    if (bitmap != null) {
+                        binding.ivSelected.setImageBitmap(bitmap)
+                    } else {
+                        Log.e("fraglog", "BitmapFactory.decodeFile returned null for path: $it")
+                    }
+                } else {
+                    Log.e("fraglog", "File does not exist: $it")
+                }
+            }
+        }
+
         return binding.root
     }
 
@@ -51,16 +74,7 @@ class EmbedWatermarkSelectFragment : Fragment() {
     override fun onStart() {
         super.onStart()
 
-        // 이미지 수신
-        @Suppress("DEPRECATION")
-        setFragmentResultListener(REQUEST_KEY) { key, bundle ->
-            val filePath = bundle.getString("selected_img_path")
-            if (filePath != null) { // null이 아닐 때만 사용
-                // 파일에서 이미지 불러오기
-                val bitmap = BitmapFactory.decodeFile(filePath)
-                binding.ivSelected.setImageBitmap(bitmap) // 이미지 iv에 배치
-            }
-        }
+
     }
 
     /**

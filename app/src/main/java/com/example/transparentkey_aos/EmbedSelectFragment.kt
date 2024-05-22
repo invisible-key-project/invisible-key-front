@@ -114,31 +114,79 @@ class EmbedSelectFragment : Fragment() {
      */
     fun setGallery(uri: Uri?) {
         uri?.let {
-            try {
-                val imgPath = getRealPathFromURI(requireContext(), uri)
-                // 다음 프래그먼트로 전환
-                replaceFragment(EmbedWatermarkSelectFragment(), imgPath)
-            } catch (e: Exception) {
-                Log.e("EmbedImageSelectFragment", "Image selection failed", e)
+            lifecycleScope.launch {
+                try {
+                    // 버튼 비활성화 및 텍스트뷰 업데이트
+                    withContext(Dispatchers.Main) {
+                        binding.btnCam.visibility = View.INVISIBLE
+                        binding.btnPhotos.visibility = View.INVISIBLE
+                        binding.tvStatus.visibility = View.VISIBLE
+                        binding.progressBar.visibility = View.VISIBLE
+                    }
+
+                    val imgPath = withContext(Dispatchers.IO) {
+                        copyUriToInternalStorage(it, requireContext())
+                    }
+                    Log.d("fraglog", "setGallery: imgPath = $imgPath")
+
+                    // 파일 삭제 작업 예약
+                    imgPath?.let { path ->
+                        scheduleFileDeletion(File(path))
+                    }
+
+                    // 다음 프래그먼트로 전환
+                    withContext(Dispatchers.Main) {
+                        replaceFragment(EmbedWatermarkSelectFragment(), imgPath)
+
+                        // 로딩 애니메이션 중지
+                        binding.progressBar.visibility = View.INVISIBLE
+                    }
+                } catch (e: Exception) {
+                    Log.e("fraglog", "Image selection failed", e)
+                    // 로딩 애니메이션 중지
+                    withContext(Dispatchers.Main) {
+                        binding.progressBar.visibility = View.INVISIBLE
+                    }
+                }
             }
         }
     }
+
+
 
     /**
      * get img Path from URI
      */
     private fun getRealPathFromURI(context: Context, uri: Uri): String? {
-        var filePath: String? = null
-        val proj = arrayOf(MediaStore.Images.Media.DATA)
-        val cursor: Cursor? = context.contentResolver.query(uri, proj, null, null, null)
+        val filePathColumn = arrayOf(MediaStore.Images.Media.DATA)
+        val cursor: Cursor? = context.contentResolver.query(uri, filePathColumn, null, null, null)
         cursor?.use {
             if (it.moveToFirst()) {
                 val columnIndex = it.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
-                filePath = it.getString(columnIndex)
+                val filePath = it.getString(columnIndex)
+                if (filePath != null) {
+                    Log.d("fraglog", "getRealPathFromURI: filePath = $filePath")
+                    return filePath
+                }
             }
         }
+
+        // Additional method to get the file path
+        var filePath: String? = null
+        val proj = arrayOf(MediaStore.Images.Media.DISPLAY_NAME)
+        val cursor2: Cursor? = context.contentResolver.query(uri, proj, null, null, null)
+        cursor2?.use {
+            if (it.moveToFirst()) {
+                val columnIndex = it.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME)
+                val fileName = it.getString(columnIndex)
+                filePath = "${context.filesDir}/$fileName"
+            }
+        }
+        Log.d("fraglog", "getRealPathFromURI (alternative): filePath = $filePath")
         return filePath
     }
+
+
 
     /**
      * replace fragment
@@ -146,7 +194,6 @@ class EmbedSelectFragment : Fragment() {
     fun replaceFragment(fragment: Fragment, imgPath: String?) {
         // 데이터 전송
         setFragmentResult(REQUEST_KEY, bundleOf("selected_img_path" to imgPath))
-        setFragmentResult("selected_embed_img_path", bundleOf("selected_embed_img_path" to imgPath)) //embed fragment로 넘겨줄 리스너
 
         requireActivity().supportFragmentManager.beginTransaction()
             .replace(R.id.fragmentContainer, fragment)
@@ -237,4 +284,24 @@ class EmbedSelectFragment : Fragment() {
         }
         return imageFile.absolutePath
     }
+
+    /**
+     * Copy gallery img
+     */
+    private fun copyUriToInternalStorage(uri: Uri, context: Context): String? {
+        val inputStream = context.contentResolver.openInputStream(uri)
+        val fileName = uri.lastPathSegment?.split("/")?.last() ?: "temp_img"
+        val file = File(context.filesDir, fileName)
+        val outputStream = FileOutputStream(file)
+
+        inputStream?.use { input ->
+            outputStream.use { output ->
+                input.copyTo(output)
+            }
+        }
+
+        return file.absolutePath
+    }
+
+
 }
