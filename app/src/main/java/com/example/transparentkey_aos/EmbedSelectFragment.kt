@@ -81,6 +81,7 @@ class EmbedSelectFragment : Fragment() {
                     binding.btnCam.visibility = View.INVISIBLE
                     binding.btnPhotos.visibility = View.INVISIBLE
                     binding.tvStatus.visibility = View.VISIBLE
+                    binding.progressBar.visibility = View.VISIBLE
                 }
 
                 val imageBitmap = withContext(Dispatchers.IO) {
@@ -95,8 +96,13 @@ class EmbedSelectFragment : Fragment() {
                     saveBitmapToFile(rotatedBitmap, "selected_img.png", requireContext())
                 }
 
-                setFragmentResult("wmSelection", bundleOf("selection" to 2, "file_path" to filePath))
-                replaceFragment(EmbedWatermarkSelectFragment(), filePath) // 사진의 경로 전송
+                // 프래그먼트 이동 및 데이터 전달
+                withContext(Dispatchers.Main) {
+                    replaceFragment(EmbedWatermarkSelectFragment(), filePath) // 사진의 경로 전송
+
+                    // 로딩 애니메이션 중지
+                    binding.progressBar.visibility = View.INVISIBLE
+                }
 
                 scheduleFileDeletion(photoFile) // 파일 삭제 작업 예약
             }
