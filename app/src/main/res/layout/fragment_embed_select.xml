@@ -20,6 +20,21 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <TextView
+        android:id="@+id/tv_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="200dp"
+        android:text="사진 업로드 중 ..."
+        android:textColor="@color/black"
+        android:textSize="22dp"
+        android:visibility="invisible"
+        android:fontFamily="@font/pretendard_bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_select" />
+
     <Button
         android:id="@+id/btn_cam"
         android:layout_width="130dp"
@@ -57,4 +72,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btn_cam" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

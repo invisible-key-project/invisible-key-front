@@ -110,7 +110,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun replaceFragment(fragment: Fragment){
         supportFragmentManager.beginTransaction()
-            .replace(R.id.fragmentCotainer, fragment)
+            .replace(R.id.fragmentContainer, fragment)
             .commit()
     }
 

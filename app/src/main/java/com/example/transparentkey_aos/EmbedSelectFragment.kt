@@ -1,6 +1,5 @@
 package com.example.transparentkey_aos
 
-
 import android.content.Context
 import android.content.Intent
 import android.database.Cursor
@@ -10,21 +9,25 @@ import android.graphics.Matrix
 import android.media.ExifInterface
 import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
-import androidx.work.*
+import androidx.lifecycle.lifecycleScope
+import androidx.work.Data
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import com.example.transparentkey_aos.databinding.FragmentEmbedSelectBinding
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -37,9 +40,7 @@ class EmbedSelectFragment : Fragment() {
     lateinit var binding: FragmentEmbedSelectBinding
     val REQUEST_IMAGE_CAPTURE = 1 // 카메라 사진 촬영 요청 코드
     private lateinit var photoFile: File // 파일 생성 시 사용
-    private lateinit var selectedImg: Bitmap
     private val REQUEST_KEY = "selected_img_path" // 요청 키
-    lateinit var curPhotoPath: String // 문자열 형태 사진 경로 값
     private var launcher = registerForActivityResult(ActivityResultContracts.GetContent()) { it ->
         setGallery(uri = it)
     }
@@ -52,7 +53,6 @@ class EmbedSelectFragment : Fragment() {
         binding = FragmentEmbedSelectBinding.inflate(inflater, container, false)
         return binding.root
     }
-
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -75,17 +75,31 @@ class EmbedSelectFragment : Fragment() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == AppCompatActivity.RESULT_OK) {
-            val imageBitmap = BitmapFactory.decodeFile(photoFile.absolutePath)
-            val rotatedBitmap = rotateImageIfRequired(imageBitmap, photoFile.absolutePath) // 필요시 회전
+            lifecycleScope.launch {
+                // 버튼 비활성화 및 텍스트뷰 업데이트
+                withContext(Dispatchers.Main) {
+                    binding.btnCam.visibility = View.INVISIBLE
+                    binding.btnPhotos.visibility = View.INVISIBLE
+                    binding.tvStatus.visibility = View.VISIBLE
+                }
 
-            binding.ivCam.setImageBitmap(rotatedBitmap)
-            selectedImg = rotatedBitmap
+                val imageBitmap = withContext(Dispatchers.IO) {
+                    BitmapFactory.decodeFile(photoFile.absolutePath)
+                }
+                val rotatedBitmap = withContext(Dispatchers.IO) {
+                    rotateImageIfRequired(imageBitmap, photoFile.absolutePath)
+                }
 
-            // 비트맵을 파일로 저장
-            val filePath = saveBitmapToFile(rotatedBitmap, "selected_img.png")
+                // 비트맵을 파일로 저장
+                val filePath = withContext(Dispatchers.IO) {
+                    saveBitmapToFile(rotatedBitmap, "selected_img.png", requireContext())
+                }
 
-            scheduleFileDeletion(photoFile) // 파일 삭제 작업 예약
-            replaceFragment(EmbedWatermarkSelectFragment(), filePath) // 사진의 경로 전송
+                setFragmentResult("wmSelection", bundleOf("selection" to 2, "file_path" to filePath))
+                replaceFragment(EmbedWatermarkSelectFragment(), filePath) // 사진의 경로 전송
+
+                scheduleFileDeletion(photoFile) // 파일 삭제 작업 예약
+            }
         }
     }
 
@@ -129,7 +143,7 @@ class EmbedSelectFragment : Fragment() {
         setFragmentResult("selected_embed_img_path", bundleOf("selected_embed_img_path" to imgPath)) //embed fragment로 넘겨줄 리스너
 
         requireActivity().supportFragmentManager.beginTransaction()
-            .replace(R.id.fragmentCotainer, fragment)
+            .replace(R.id.fragmentContainer, fragment)
             .addToBackStack(null)
             .commit()
     }
@@ -204,8 +218,8 @@ class EmbedSelectFragment : Fragment() {
     /**
      * Save Bitmap To File
      */
-    fun saveBitmapToFile(bitmap: Bitmap, fileName: String): String {
-        val storageDir = requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+    fun saveBitmapToFile(bitmap: Bitmap, fileName: String, context: Context): String {
+        val storageDir: File = context.filesDir
         val imageFile = File(storageDir, fileName)
         try {
             val fos = FileOutputStream(imageFile)

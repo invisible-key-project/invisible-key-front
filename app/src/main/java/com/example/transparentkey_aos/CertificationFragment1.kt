@@ -80,7 +80,7 @@ class CertificationFragment1 : Fragment() {
         }
         binding.cert1ExtractBtn.setOnClickListener {
             (context as MainActivity).supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentCotainer, CertificationFragment2())
+                .replace(R.id.fragmentContainer, CertificationFragment2())
                 .commitAllowingStateLoss()
         }
 
@@ -93,7 +93,7 @@ class CertificationFragment1 : Fragment() {
 
     fun returnToMainFragment() {
         (context as MainActivity).supportFragmentManager.beginTransaction()
-            .replace(R.id.fragmentCotainer, MainFragment())
+            .replace(R.id.fragmentContainer, MainFragment())
             .commitAllowingStateLoss()
     }
 

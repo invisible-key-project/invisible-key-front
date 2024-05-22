@@ -75,7 +75,7 @@ class EmbedDialogFragment : DialogFragment() {
      */
     private fun replaceFragment(fragment: Fragment) {
         requireActivity().supportFragmentManager.beginTransaction()
-            .replace(R.id.fragmentCotainer, fragment)
+            .replace(R.id.fragmentContainer, fragment)
             .commit()
     }
 

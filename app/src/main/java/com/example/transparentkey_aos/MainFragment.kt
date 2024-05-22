@@ -19,7 +19,7 @@ class MainFragment : Fragment() {
 
         binding.btnExtract.setOnClickListener {
             (context as MainActivity).supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentCotainer, CertificationFragment1())
+                .replace(R.id.fragmentContainer, CertificationFragment1())
                 .commitAllowingStateLoss()
         }
         return binding.root
@@ -42,7 +42,7 @@ class MainFragment : Fragment() {
      */
     private fun replaceFragment(fragment: Fragment) {
         requireActivity().supportFragmentManager.beginTransaction()
-            .replace(R.id.fragmentCotainer, fragment)
+            .replace(R.id.fragmentContainer, fragment)
             .commit()
     }
 }
