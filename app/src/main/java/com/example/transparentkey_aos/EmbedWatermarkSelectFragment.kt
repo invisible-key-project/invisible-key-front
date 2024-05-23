@@ -71,12 +71,6 @@ class EmbedWatermarkSelectFragment : Fragment() {
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-
-
-    }
-
     /**
      * fragment replace
      */

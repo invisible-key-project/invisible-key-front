@@ -152,42 +152,6 @@ class EmbedSelectFragment : Fragment() {
         }
     }
 
-
-
-    /**
-     * get img Path from URI
-     */
-    private fun getRealPathFromURI(context: Context, uri: Uri): String? {
-        val filePathColumn = arrayOf(MediaStore.Images.Media.DATA)
-        val cursor: Cursor? = context.contentResolver.query(uri, filePathColumn, null, null, null)
-        cursor?.use {
-            if (it.moveToFirst()) {
-                val columnIndex = it.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
-                val filePath = it.getString(columnIndex)
-                if (filePath != null) {
-                    Log.d("fraglog", "getRealPathFromURI: filePath = $filePath")
-                    return filePath
-                }
-            }
-        }
-
-        // Additional method to get the file path
-        var filePath: String? = null
-        val proj = arrayOf(MediaStore.Images.Media.DISPLAY_NAME)
-        val cursor2: Cursor? = context.contentResolver.query(uri, proj, null, null, null)
-        cursor2?.use {
-            if (it.moveToFirst()) {
-                val columnIndex = it.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME)
-                val fileName = it.getString(columnIndex)
-                filePath = "${context.filesDir}/$fileName"
-            }
-        }
-        Log.d("fraglog", "getRealPathFromURI (alternative): filePath = $filePath")
-        return filePath
-    }
-
-
-
     /**
      * replace fragment
      */
@@ -289,20 +253,62 @@ class EmbedSelectFragment : Fragment() {
     /**
      * Copy gallery img
      */
+    /**
+     * Copy gallery img
+     */
     private fun copyUriToInternalStorage(uri: Uri, context: Context): String? {
         val inputStream = context.contentResolver.openInputStream(uri)
         val fileName = uri.lastPathSegment?.split("/")?.last() ?: "temp_img"
         val file = File(context.filesDir, fileName)
-        val outputStream = FileOutputStream(file)
 
-        inputStream?.use { input ->
-            outputStream.use { output ->
-                input.copyTo(output)
+        if (inputStream == null) {
+            Log.e("fraglog", "Failed to open input stream for URI: $uri")
+            return null
+        }
+
+        try {
+            val outputStream = FileOutputStream(file)
+            inputStream.use { input ->
+                outputStream.use { output ->
+                    input.copyTo(output)
+                }
             }
+        } catch (e: Exception) {
+            Log.e("fraglog", "Error copying file: ${e.message}")
+            e.printStackTrace()
+            return null
+        }
+
+        // Check if the file was successfully copied
+        if (!file.exists()) {
+            Log.e("fraglog", "File was not successfully copied")
+            return null
+        }
+
+        // Decode the copied file to a bitmap
+        val tempBitmap = BitmapFactory.decodeFile(file.absolutePath)
+        if (tempBitmap == null) {
+            Log.e("fraglog", "decodeFile(${file.absolutePath}) returned null")
+            return null
+        }
+
+        // Rotate the image if required
+        val rotatedBitmap = rotateImageIfRequired(tempBitmap, file.absolutePath)
+
+        // Save rotated bitmap to internal storage
+        try {
+            FileOutputStream(file).use { fos ->
+                rotatedBitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
+            }
+        } catch (e: IOException) {
+            Log.e("fraglog", "Error saving rotated bitmap to file: ${e.message}")
+            e.printStackTrace()
+            return null
         }
 
         return file.absolutePath
     }
+
 
 
 }
