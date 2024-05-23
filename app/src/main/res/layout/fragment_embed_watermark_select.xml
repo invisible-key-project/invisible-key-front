@@ -54,7 +54,7 @@
         android:fontFamily="@font/pretendard_bold"
         android:paddingLeft="0dp"
         android:paddingRight="0dp"
-        android:text="이미지"
+        android:text="이미지\n(64x64 권장)"
         android:textSize="16dp"
         app:layout_constraintBottom_toBottomOf="@+id/btn_qr"
         app:layout_constraintEnd_toEndOf="parent"
