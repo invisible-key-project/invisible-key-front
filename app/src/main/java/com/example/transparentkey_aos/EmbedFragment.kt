@@ -94,9 +94,17 @@ class EmbedFragment : Fragment() {
                             val file = File(it)
                             if (file.exists()) {
                                 Log.d("fraglog", "File exists: $it")
-                                val bitmap = BitmapFactory.decodeFile(it)
-                                if (bitmap != null) {
+
+                                // selected_img 비트맵으로 불러오기
+                                val selected_img = BitmapFactory.decodeFile(selected_img_path)
+
+                                // 워터마크 이미지 비트맵으로 불러오기
+                                wmImg = BitmapFactory.decodeFile(it)
+                                if (wmImg != null) {
                                     binding.ivWmImage.setImageBitmap(bitmap)
+
+                                    // 서버에 업로드
+                                    uploadImages(selected_img, wmImg)
                                 } else {
                                     Log.e("fraglog", "BitmapFactory.decodeFile returned null for path: $it")
                                 }
