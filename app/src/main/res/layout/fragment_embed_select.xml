@@ -26,7 +26,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="200dp"
         android:fontFamily="@font/pretendard_bold"
-        android:text="사진 업로드 중 ..."
+        android:text="사진 로드 중 ..."
         android:textColor="@color/black"
         android:textSize="22dp"
         android:visibility="invisible"

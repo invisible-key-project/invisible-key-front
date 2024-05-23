@@ -250,9 +250,7 @@ class EmbedSelectFragment : Fragment() {
         return imageFile.absolutePath
     }
 
-    /**
-     * Copy gallery img
-     */
+
     /**
      * Copy gallery img
      */

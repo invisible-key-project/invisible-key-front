@@ -24,6 +24,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.io.ByteArrayOutputStream
+import java.io.File
 
 class EmbedFragment : Fragment() {
     lateinit var binding: FragmentEmbedBinding
@@ -86,22 +87,26 @@ class EmbedFragment : Fragment() {
                 // img
                 // 워터마크 이미지 수신
                 2 -> {
-                    setFragmentResultListener("wmimg_embed") { key, bundle ->
-                        val img: Bitmap? = bundle.getParcelable("wmimg_embed")
-                        if (img != null) {
-                            wmImg = img
-                            binding.ivWmImage.setImageBitmap(wmImg)
-
-                            if (::selected_img_path.isInitialized) {
-                                val selected_img = BitmapFactory.decodeFile(selected_img_path)
-                                uploadImages(selected_img, wmImg)
+                    parentFragmentManager.setFragmentResultListener("wmimg_embed", this) { _, bundle ->
+                        val imgPath = bundle.getString("wmimg_embed")
+                        Log.d("fraglog", "embedFragment(image selected)---onCreateView: imgPath = $imgPath")
+                        imgPath?.let {
+                            val file = File(it)
+                            if (file.exists()) {
+                                Log.d("fraglog", "File exists: $it")
+                                val bitmap = BitmapFactory.decodeFile(it)
+                                if (bitmap != null) {
+                                    binding.ivWmImage.setImageBitmap(bitmap)
+                                } else {
+                                    Log.e("fraglog", "BitmapFactory.decodeFile returned null for path: $it")
+                                }
                             } else {
-                                Toast.makeText(context, "이미지 경로가 초기화되지 않았습니다.", Toast.LENGTH_SHORT).show()
+                                Log.e("fraglog", "File does not exist: $it")
                             }
-                        } else {
-                            Toast.makeText(context, "워터마크 이미지를 불러오는데 실패했습니다.", Toast.LENGTH_SHORT).show()
                         }
                     }
+
+
                 }
 
                 else -> {

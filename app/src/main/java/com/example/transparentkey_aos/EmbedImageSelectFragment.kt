@@ -1,7 +1,10 @@
 package com.example.transparentkey_aos
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
+import android.media.ExifInterface
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -13,11 +16,22 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
+import androidx.lifecycle.lifecycleScope
+import androidx.work.Data
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import com.example.transparentkey_aos.databinding.FragmentEmbedImageSelectBinding
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.util.concurrent.TimeUnit
 
 class EmbedImageSelectFragment : Fragment() {
     lateinit var binding: FragmentEmbedImageSelectBinding
-    private val REQUEST_KEY = "wm_img" // api요청 키
+    private val REQUEST_KEY = "wm_img_path" // api요청 키
     private lateinit var selectedWatermark: Bitmap
     private var launcher = registerForActivityResult(ActivityResultContracts.GetContent()) { it ->
         setGallery(uri = it)
@@ -47,20 +61,153 @@ class EmbedImageSelectFragment : Fragment() {
      */
     fun setGallery(uri: Uri?) {
         uri?.let {
-            try {
-                val inputStream = requireActivity().contentResolver.openInputStream(uri)
-                selectedWatermark = BitmapFactory.decodeStream(inputStream)
+            // 복사한 코드
+            lifecycleScope.launch {
+                try {
+                    // 버튼 비활성화 및 텍스트뷰 업데이트
+                    withContext(Dispatchers.Main) {
+                        binding.tvStatus.visibility = View.VISIBLE
+                        binding.progressBar.visibility = View.VISIBLE
+                    }
 
-                // 다음 다이얼로그로 전환
-                setFragmentResult(REQUEST_KEY, bundleOf("wm_img" to selectedWatermark))
-                setFragmentResult("wmimg_embed", bundleOf("wmimg_embed" to selectedWatermark))
-                showImgDialog()
-            } catch (e: Exception) {
-                Log.e("EmbedImageSelectFragment", "Image selection failed", e)
+                    val imgPath = withContext(Dispatchers.IO) {
+                        copyUriToInternalStorage(it, requireContext())
+                    }
+                    Log.d("fraglog", "setGallery: imgPath = $imgPath")
+
+                    // 파일 삭제 작업 예약
+                    imgPath?.let { path ->
+                        scheduleFileDeletion(File(path))
+                    }
+
+                    // 다음 프래그먼트로 전환
+                    withContext(Dispatchers.Main) {
+                        // 다음 다이얼로그로 전환
+                        setFragmentResult(REQUEST_KEY, bundleOf("wm_img_path" to imgPath))
+                        setFragmentResult("wmimg_embed", bundleOf("wmimg_embed" to imgPath))
+                        showImgDialog()
+
+                        // 로딩 애니메이션 중지
+                        binding.progressBar.visibility = View.INVISIBLE
+                        binding.tvStatus.visibility = View.INVISIBLE
+                    }
+                } catch (e: Exception) {
+                    Log.e("fraglog", "Image selection failed", e)
+                    // 로딩 애니메이션 중지
+                    withContext(Dispatchers.Main) {
+                        binding.progressBar.visibility = View.INVISIBLE
+                    }
+                }
             }
         }
     }
 
+    /**
+     * Copy gallery img
+     */
+    private fun copyUriToInternalStorage(uri: Uri, context: Context): String? {
+        val inputStream = context.contentResolver.openInputStream(uri)
+        val fileName = uri.lastPathSegment?.split("/")?.last() ?: "temp_img"
+        val file = File(context.filesDir, fileName)
+
+        if (inputStream == null) {
+            Log.e("fraglog", "Failed to open input stream for URI: $uri")
+            return null
+        }
+
+        try {
+            val outputStream = FileOutputStream(file)
+            inputStream.use { input ->
+                outputStream.use { output ->
+                    input.copyTo(output)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("fraglog", "Error copying file: ${e.message}")
+            e.printStackTrace()
+            return null
+        }
+
+        // Check if the file was successfully copied
+        if (!file.exists()) {
+            Log.e("fraglog", "File was not successfully copied")
+            return null
+        }
+
+        // Decode the copied file to a bitmap
+        val tempBitmap = BitmapFactory.decodeFile(file.absolutePath)
+        if (tempBitmap == null) {
+            Log.e("fraglog", "decodeFile(${file.absolutePath}) returned null")
+            return null
+        }
+
+        // Rotate the image if required
+        val rotatedBitmap = rotateImageIfRequired(tempBitmap, file.absolutePath)
+
+        // Save rotated bitmap to internal storage
+        try {
+            FileOutputStream(file).use { fos ->
+                rotatedBitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
+            }
+        } catch (e: IOException) {
+            Log.e("fraglog", "Error saving rotated bitmap to file: ${e.message}")
+            e.printStackTrace()
+            return null
+        }
+
+        return file.absolutePath
+    }
+
+    /**
+     * if Required, call Rotate Image
+     */
+    fun rotateImageIfRequired(img: Bitmap, selectedImage: String): Bitmap {
+        // ExifInterface를 사용해 이미지 파일의 EXIF 메타데이터를 읽어옴
+        val ei: ExifInterface = try {
+            ExifInterface(selectedImage)
+        } catch (e: IOException) {
+            e.printStackTrace()
+            return img // 예외 발생 시 원본 이미지를 반환
+        }
+
+        // EXIF에서 방향 정보를 가져옴
+        val orientation: Int = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
+
+        // 방향 정보에 따라 이미지를 회전시킴
+        return when (orientation) {
+            ExifInterface.ORIENTATION_ROTATE_90 -> rotateImage(img, 90f)
+            ExifInterface.ORIENTATION_ROTATE_180 -> rotateImage(img, 180f)
+            ExifInterface.ORIENTATION_ROTATE_270 -> rotateImage(img, 270f)
+            else -> img // 회전이 필요 없는 경우 원본 이미지를 반환
+        }
+    }
+
+    /**
+     * Rotate Img
+     */
+    private fun rotateImage(img: Bitmap, degree: Float): Bitmap {
+        // Matrix 객체를 생성하여 회전 변환을 적용
+        val matrix = Matrix()
+        matrix.postRotate(degree)
+        // 회전된 비트맵을 생성하여 반환
+        return Bitmap.createBitmap(img, 0, 0, img.width, img.height, matrix, true)
+    }
+
+    /**
+     * delete temp img automatically (15min)
+     */
+    private fun scheduleFileDeletion(file: File) {
+        val data = Data.Builder()
+            .putString("file_path", file.absolutePath)
+            .build()
+
+        val deleteRequest = OneTimeWorkRequestBuilder<DeleteFileWorker>()
+            .setInitialDelay(15, TimeUnit.MINUTES) // 15분 후 삭제
+            .setInputData(data)
+            .build()
+
+        WorkManager.getInstance(requireContext()).enqueue(deleteRequest)
+    }
 
     /**
      * show img dialog
