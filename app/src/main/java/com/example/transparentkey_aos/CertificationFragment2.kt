@@ -37,10 +37,9 @@ class CertificationFragment2 : Fragment() {
         // LiveData 관찰
         viewModel.serverResponse.observe(viewLifecycleOwner, Observer { serverResponse ->
             // serverResponse 사용
-            // 예: textView.text = serverResponse.userId
             binding.cert2IdTv.text = serverResponse.userId
-            val serverResponseDate = "240418"
-            val formattedDate = simpleFormatDateString(serverResponseDate)
+
+            val formattedDate = simpleFormatDateString(serverResponse.date)
             println(formattedDate)
             binding.cert2DateTv.text = formattedDate
         })
