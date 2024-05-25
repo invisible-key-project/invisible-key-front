@@ -17,8 +17,10 @@ import com.example.transparentkey_aos.databinding.FragmentEmbedBinding
 import com.example.transparentkey_aos.retrofit2.QRModel
 import com.example.transparentkey_aos.retrofit2.RetrofitClient
 import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
@@ -95,18 +97,23 @@ class EmbedFragment : Fragment() {
                             if (file.exists()) {
                                 Log.d("fraglog", "File exists: $it")
 
-                                // selected_img 비트맵으로 불러오기
-                                val selected_img = BitmapFactory.decodeFile(selected_img_path)
+                                // selected_img_path가 초기화되었을 때만 실행
+                                if (::selected_img_path.isInitialized) {
+                                    // selected_img 비트맵으로 불러오기
+                                    val selected_img = BitmapFactory.decodeFile(selected_img_path)
 
-                                // 워터마크 이미지 비트맵으로 불러오기
-                                wmImg = BitmapFactory.decodeFile(it)
-                                if (wmImg != null) {
-                                    binding.ivWmImage.setImageBitmap(bitmap)
+                                    // 워터마크 이미지 비트맵으로 불러오기
+                                    wmImg = BitmapFactory.decodeFile(it)
+                                    if (wmImg != null) {
+                                        binding.ivWmImage.setImageBitmap(bitmap)
 
-                                    // 서버에 업로드
-                                    uploadImages(selected_img, wmImg)
+                                        // 서버에 업로드
+                                        uploadImages(selected_img, wmImg)
+                                    } else {
+                                        Log.e("fraglog", "BitmapFactory.decodeFile returned null for path: $it")
+                                    }
                                 } else {
-                                    Log.e("fraglog", "BitmapFactory.decodeFile returned null for path: $it")
+                                    Toast.makeText(context, "이미지 경로가 초기화되지 않았습니다.", Toast.LENGTH_SHORT).show()
                                 }
                             } else {
                                 Log.e("fraglog", "File does not exist: $it")
@@ -148,11 +155,13 @@ class EmbedFragment : Fragment() {
         wm_img?.compress(Bitmap.CompressFormat.PNG, 100, stream2)
         val byteArray2 = stream2.toByteArray()
 
-        val requestFile1 = RequestBody.create(MediaType.parse("image/jpeg"), byteArray1)
+//        val requestFile1 = RequestBody.create(MediaType.parse("image/jpeg"), byteArray1)
+        val requestFile1 = byteArray1.toRequestBody("image/jpeg".toMediaTypeOrNull())
         val body1 =
             MultipartBody.Part.createFormData("background_img", "background_img.jpg", requestFile1)
 
-        val requestFile2 = RequestBody.create(MediaType.parse("image/png"), byteArray2)
+//        val requestFile2 = RequestBody.create(MediaType.parse("image/png"), byteArray2)
+        val requestFile2 = byteArray2.toRequestBody("image/jpeg".toMediaTypeOrNull())
         val body2 = MultipartBody.Part.createFormData("wm_img", "wm_img.png", requestFile2)
 
         RetrofitClient.instance.uploadImages(body1, body2).enqueue(object :
