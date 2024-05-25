@@ -85,7 +85,7 @@ class EmbedGenerateQRFragment : Fragment() {
 
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
                 Log.e("API_CALL", "Network call failed: ${t.message}")
-                Toast.makeText(context, "Network call failed: ${t.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Network call failed: ${t.message}", Toast.LENGTH_SHORT).show()
             }
 
         })

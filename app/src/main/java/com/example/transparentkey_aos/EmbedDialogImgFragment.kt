@@ -18,7 +18,7 @@ import java.io.File
 
 class EmbedDialogImgFragment : DialogFragment() {
     private lateinit var binding: FragmentEmbedDialogImgBinding
-    private lateinit var wm_img: Bitmap
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
@@ -69,7 +69,7 @@ class EmbedDialogImgFragment : DialogFragment() {
         val window = dialog?.window
         val params = window?.attributes
 
-        params?.dimAmount = 0.9f // 배경 어두움 정도 설정
+        params?.dimAmount = 0.5f // 배경 어두움 정도 설정
         dialog?.setCanceledOnTouchOutside(true) // 외부 터치 시 닫히게 설정
         window?.attributes = params
         window?.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
