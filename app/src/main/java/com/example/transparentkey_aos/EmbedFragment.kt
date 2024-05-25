@@ -17,18 +17,21 @@ import com.example.transparentkey_aos.databinding.FragmentEmbedBinding
 import com.example.transparentkey_aos.retrofit2.QRModel
 import com.example.transparentkey_aos.retrofit2.RetrofitClient
 import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.io.ByteArrayOutputStream
+import java.io.File
 
 class EmbedFragment : Fragment() {
     lateinit var binding: FragmentEmbedBinding
     lateinit var wmImg: Bitmap
-    lateinit var selected_img:Bitmap
+    lateinit var selected_img_path: String
     var bitmap: Bitmap? = null
 
 
@@ -48,68 +51,80 @@ class EmbedFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // 워터마크 할 이미지 수신
+        setFragmentResultListener("selected_embed_img_path") { key, bundle ->
+            val filePath = bundle.getString("selected_embed_img_path")
+            if (filePath != null) {
+                selected_img_path = filePath
+                Log.d("fraglog", "selected_img_path initialized: $selected_img_path")
+            } else {
+                Toast.makeText(context, "선택한 이미지 경로를 불러오는데 실패했습니다.", Toast.LENGTH_SHORT).show()
+            }
+        }
+
         // type 수신
         setFragmentResultListener("wmSelection") { key, bundle ->
             val selection = bundle.getInt("selection", -1)
             when (selection) {
                 // qr 선택한 경우 실행
                 1 -> {
-                    @Suppress("DEPRECATION")
                     setFragmentResultListener("qr_img") { key, bundle ->
                         val img: Bitmap? = bundle.getParcelable("qr_img")
-                        if (img != null) { // null이 아닐 때만 사용
+                        if (img != null) {
                             wmImg = img
-                            binding.ivWmImage.setImageBitmap(wmImg) // 이미지 iv에 배치
+                            binding.ivWmImage.setImageBitmap(wmImg)
+
+                            if (::selected_img_path.isInitialized) {
+                                val selected_img = BitmapFactory.decodeFile(selected_img_path)
+                                uploadImages(selected_img, wmImg)
+                            } else {
+                                Toast.makeText(context, "이미지 경로가 초기화되지 않았습니다.", Toast.LENGTH_SHORT).show()
+                            }
                         } else {
                             Toast.makeText(context, "워터마크 이미지를 불러오는데 실패했습니다.", Toast.LENGTH_SHORT).show()
                         }
                     }
-                    // 워터마크 할 이미지 수신
-                    @Suppress("DEPRECATION")
-                    setFragmentResultListener("selected_embed_img") { key, bundle ->
-                        val img: Bitmap? = bundle.getParcelable("selected_embed_img")
-                        if (img != null) { // null이 아닐 때만 사용
-                            selected_img = img
-//                binding.ivWmImage.setImageBitmap(selected_img)
-                            uploadImages(selected_img, wmImg)
-                        }else {
-                            // img가 null인 경우의 처리 로직
-                            Toast.makeText(context, "배경 이미지를 불러오는데 실패했습니다.", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-
                 }
 
                 // img
                 // 워터마크 이미지 수신
                 2 -> {
-                    @Suppress("DEPRECATION")
-                    setFragmentResultListener("wmimg_embed") { key, bundle ->
-                        val img: Bitmap? = bundle.getParcelable("wmimg_embed")
-                        if (img != null) { // null이 아닐 때만 사용
-                            wmImg = img
-                            binding.ivWmImage.setImageBitmap(wmImg) // 이미지 iv에 배치
-                        } else {
-                            Toast.makeText(context, "워터마크 이미지를 불러오는데 실패했습니다.", Toast.LENGTH_SHORT).show()
+                    parentFragmentManager.setFragmentResultListener("wmimg_embed", this) { _, bundle ->
+                        val imgPath = bundle.getString("wmimg_embed")
+                        Log.d("fraglog", "embedFragment(image selected)---onCreateView: imgPath = $imgPath")
+                        imgPath?.let {
+                            val file = File(it)
+                            if (file.exists()) {
+                                Log.d("fraglog", "File exists: $it")
+
+                                // selected_img_path가 초기화되었을 때만 실행
+                                if (::selected_img_path.isInitialized) {
+                                    // selected_img 비트맵으로 불러오기
+                                    val selected_img = BitmapFactory.decodeFile(selected_img_path)
+
+                                    // 워터마크 이미지 비트맵으로 불러오기
+                                    wmImg = BitmapFactory.decodeFile(it)
+                                    if (wmImg != null) {
+                                        binding.ivWmImage.setImageBitmap(bitmap)
+
+                                        // 서버에 업로드
+                                        uploadImages(selected_img, wmImg)
+                                    } else {
+                                        Log.e("fraglog", "BitmapFactory.decodeFile returned null for path: $it")
+                                    }
+                                } else {
+                                    Toast.makeText(context, "이미지 경로가 초기화되지 않았습니다.", Toast.LENGTH_SHORT).show()
+                                }
+                            } else {
+                                Log.e("fraglog", "File does not exist: $it")
+                            }
                         }
                     }
 
-                    // 워터마크 할 배경 이미지 수신
-                    @Suppress("DEPRECATION")
-                    setFragmentResultListener("selected_embed_img") { key, bundle ->
-                        // 이미지 수신 안 되는 오류 : 다른 키 사용으로 해결
-                        val img: Bitmap? = bundle.getParcelable("selected_embed_img")
-                        if (img != null) { // null이 아닐 때만 사용
-                            selected_img = img
-//                            binding.ivWmImage.setImageBitmap(selected_img)
-                            uploadImages(selected_img, wmImg)
-                        }
-                    }
 
                 }
 
                 else -> {
-                    // 예외 처리
                     Toast.makeText(context, "버튼 선택 결과 전송 실패", Toast.LENGTH_SHORT).show()
                 }
             }
@@ -117,13 +132,12 @@ class EmbedFragment : Fragment() {
 
         // save button click listener
         binding.btnSaveImg.setOnClickListener {
-            bitmap?.let { safeBitmap -> // null 검사
+            bitmap?.let { safeBitmap ->
                 saveImageToStorage(safeBitmap)
             } ?: Toast.makeText(context, "이미지가 존재하지 않습니다.", Toast.LENGTH_SHORT).show()
         }
-
-
     }
+
 
     /**
      * Apply watermark
@@ -141,10 +155,13 @@ class EmbedFragment : Fragment() {
         wm_img?.compress(Bitmap.CompressFormat.PNG, 100, stream2)
         val byteArray2 = stream2.toByteArray()
 
-        val requestFile1 = RequestBody.create(MediaType.parse("image/jpeg"), byteArray1)
-        val body1 = MultipartBody.Part.createFormData("background_img", "background_img.jpg", requestFile1)
+//        val requestFile1 = RequestBody.create(MediaType.parse("image/jpeg"), byteArray1)
+        val requestFile1 = byteArray1.toRequestBody("image/jpeg".toMediaTypeOrNull())
+        val body1 =
+            MultipartBody.Part.createFormData("background_img", "background_img.jpg", requestFile1)
 
-        val requestFile2 = RequestBody.create(MediaType.parse("image/png"), byteArray2)
+//        val requestFile2 = RequestBody.create(MediaType.parse("image/png"), byteArray2)
+        val requestFile2 = byteArray2.toRequestBody("image/jpeg".toMediaTypeOrNull())
         val body2 = MultipartBody.Part.createFormData("wm_img", "wm_img.png", requestFile2)
 
         RetrofitClient.instance.uploadImages(body1, body2).enqueue(object :
@@ -174,7 +191,8 @@ class EmbedFragment : Fragment() {
 
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
                 Log.e("API_CALL", "Network call failed: ${t.message}")
-                Toast.makeText(context, "Network call failed: ${t.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Network call failed: ${t.message}", Toast.LENGTH_SHORT)
+                    .show()
             }
 
         })
@@ -189,7 +207,10 @@ class EmbedFragment : Fragment() {
         val contentValues = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
             put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
-            put(MediaStore.MediaColumns.RELATIVE_PATH, "${Environment.DIRECTORY_PICTURES}/$appName")  // 경로 설정
+            put(
+                MediaStore.MediaColumns.RELATIVE_PATH,
+                "${Environment.DIRECTORY_PICTURES}/$appName"
+            )  // 경로 설정
         }
 
         val resolver = context?.contentResolver

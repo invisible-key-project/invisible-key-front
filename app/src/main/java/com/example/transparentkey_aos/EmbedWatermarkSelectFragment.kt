@@ -1,10 +1,12 @@
 package com.example.transparentkey_aos
 
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.ColorFilter
 import android.graphics.PorterDuff
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -15,11 +17,11 @@ import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.setFragmentResultListener
 import com.example.transparentkey_aos.databinding.FragmentEmbedWatermarkSelectBinding
 import com.example.transparentkey_aos.databinding.FragmentEmbedSelectBinding
+import java.io.File
 
 class EmbedWatermarkSelectFragment : Fragment() {
     lateinit var binding: FragmentEmbedWatermarkSelectBinding
-    lateinit var selectedImg: Bitmap
-    private val REQUEST_KEY = "selected_img" // 데이터 요청 키
+    private val REQUEST_KEY = "selected_img_path" // 데이터 요청 키
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,6 +35,27 @@ class EmbedWatermarkSelectFragment : Fragment() {
         binding = FragmentEmbedWatermarkSelectBinding.inflate(inflater, container, false)
 
 //        Toast.makeText(context, "watermark select fragment", Toast.LENGTH_SHORT).show()
+        // 이미지 수신
+        // 이미지 경로를 가져와서 이미지뷰에 설정
+        parentFragmentManager.setFragmentResultListener(REQUEST_KEY, this) { _, bundle ->
+            val imgPath = bundle.getString("selected_img_path")
+            Log.d("fraglog", "onCreateView: imgPath = $imgPath")
+            imgPath?.let {
+                val file = File(it)
+                if (file.exists()) {
+                    Log.d("fraglog", "File exists: $it")
+                    val bitmap = BitmapFactory.decodeFile(it)
+                    if (bitmap != null) {
+                        binding.ivSelected.setImageBitmap(bitmap)
+                    } else {
+                        Log.e("fraglog", "BitmapFactory.decodeFile returned null for path: $it")
+                    }
+                } else {
+                    Log.e("fraglog", "File does not exist: $it")
+                }
+            }
+        }
+
         return binding.root
     }
 
@@ -45,21 +68,6 @@ class EmbedWatermarkSelectFragment : Fragment() {
         binding.btnImg.setOnClickListener {
             setFragmentResult("wmSelection", bundleOf("selection" to 2))
             replaceFragment(EmbedImageSelectFragment())
-//            Toast.makeText(context, "개발 중입니다.", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    override fun onStart() {
-        super.onStart()
-
-        // 이미지 수신
-        @Suppress("DEPRECATION")
-        setFragmentResultListener(REQUEST_KEY) { key, bundle ->
-            val img: Bitmap? = bundle.getParcelable("selected_img")
-            if (img != null) { // null이 아닐 때만 사용
-                selectedImg = img
-                binding.ivSelected.setImageBitmap(selectedImg) // 이미지 iv에 배치
-            }
         }
     }
 
@@ -68,7 +76,7 @@ class EmbedWatermarkSelectFragment : Fragment() {
      */
     fun replaceFragment(fragment: Fragment) {
         requireActivity().supportFragmentManager.beginTransaction()
-            .replace(R.id.fragmentCotainer, fragment)
+            .replace(R.id.fragmentContainer, fragment)
             .commit()
     }
 

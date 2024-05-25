@@ -26,8 +26,10 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.transparentkey_aos.databinding.FragmentCertification1Binding
 import com.example.transparentkey_aosdata.ServerResponse
 import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -80,7 +82,7 @@ class CertificationFragment1 : Fragment() {
         }
         binding.cert1ExtractBtn.setOnClickListener {
             (context as MainActivity).supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentCotainer, CertificationFragment2())
+                .replace(R.id.fragmentContainer, CertificationFragment2())
                 .commitAllowingStateLoss()
         }
 
@@ -93,7 +95,7 @@ class CertificationFragment1 : Fragment() {
 
     fun returnToMainFragment() {
         (context as MainActivity).supportFragmentManager.beginTransaction()
-            .replace(R.id.fragmentCotainer, MainFragment())
+            .replace(R.id.fragmentContainer, MainFragment())
             .commitAllowingStateLoss()
     }
 
@@ -140,7 +142,9 @@ class CertificationFragment1 : Fragment() {
     fun createImagePart(imageUri: Uri, context: Context): MultipartBody.Part {
         val inputStream: InputStream? = context.contentResolver.openInputStream(imageUri)
         val byteArray = inputStream.use { it?.readBytes() } // use 블록 안에서 자동으로 스트림을 닫아줍니다.
-        val requestBody = RequestBody.create(MediaType.parse("image/jpeg"), byteArray)
+//        val requestBody = RequestBody.create(MediaType.parse("image/jpeg"), byteArray)
+        val requestBody = byteArray?.toRequestBody("image/jpeg".toMediaTypeOrNull())
+            ?: throw IllegalArgumentException("Unable to create request body from input stream")
 
         return MultipartBody.Part.createFormData("imageFile", "watermarked_image.png", requestBody)
     }

@@ -9,7 +9,7 @@
         android:id="@+id/tv_embed_watermark"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="156dp"
+        android:layout_marginTop="100dp"
         android:fontFamily="@font/pretendard_bold"
         android:text="워터마크 삽입 중 ..."
         android:textColor="@color/black"
@@ -20,8 +20,8 @@
 
     <ImageView
         android:id="@+id/iv_wm_image"
-        android:layout_width="290dp"
         android:layout_height="290dp"
+        android:layout_width="200dp"
         android:layout_marginTop="10dp"
         android:layout_marginBottom="110dp"
         app:layout_constraintBottom_toBottomOf="parent"

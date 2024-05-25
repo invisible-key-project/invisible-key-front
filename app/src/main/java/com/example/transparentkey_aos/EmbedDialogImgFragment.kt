@@ -1,7 +1,9 @@
 package com.example.transparentkey_aos
 
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,29 +12,15 @@ import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.setFragmentResultListener
-import com.example.transparentkey_aos.databinding.FragmentEmbedDialogBinding
 import com.example.transparentkey_aos.databinding.FragmentEmbedDialogImgBinding
-import com.example.transparentkey_aos.databinding.FragmentEmbedSelectBinding
-import java.util.Date
+import java.io.File
 
 class EmbedDialogImgFragment : DialogFragment() {
     private lateinit var binding: FragmentEmbedDialogImgBinding
-    private lateinit var wm_img: Bitmap
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        isCancelable = true
-        // 이미지 수신
-        @Suppress("DEPRECATION")
-        setFragmentResultListener("wm_img") { key, bundle ->
-            val img: Bitmap? = bundle.getParcelable("wm_img")
-            if (img != null) { // null이 아닐 때만 사용
-                wm_img = img
-                binding.ivDialog.setImageBitmap(wm_img) // 이미지 iv에 배치
-            }
-        }
-
     }
 
     override fun onCreateView(
@@ -41,6 +29,28 @@ class EmbedDialogImgFragment : DialogFragment() {
         savedInstanceState: Bundle?
     ): View? {
         binding = FragmentEmbedDialogImgBinding.inflate(inflater, container, false)
+        // 이미지 경로 수신, 이미지뷰에 설정
+        parentFragmentManager.setFragmentResultListener("wm_img_path", this) { _, bundle ->
+            val imgPath = bundle.getString("wm_img_path")
+            Log.d("fraglog", "dialog---onCreateView: imgPath = $imgPath")
+            imgPath?.let {
+                val file = File(it)
+                if (file.exists()) {
+                    Log.d("fraglog", "File exists: $it")
+                    val bitmap = BitmapFactory.decodeFile(it)
+                    if (bitmap != null) {
+                        binding.ivDialog.setImageBitmap(bitmap)
+                    } else {
+                        Log.e("fraglog", "BitmapFactory.decodeFile returned null for path: $it")
+                    }
+                } else {
+                    Log.e("fraglog", "File does not exist: $it")
+                }
+            }
+        }
+
+        isCancelable = true
+
         return binding.root
     }
 
@@ -59,7 +69,7 @@ class EmbedDialogImgFragment : DialogFragment() {
         val window = dialog?.window
         val params = window?.attributes
 
-        params?.dimAmount = 0.9f // 배경 어두움 정도 설정
+        params?.dimAmount = 0.5f // 배경 어두움 정도 설정
         dialog?.setCanceledOnTouchOutside(true) // 외부 터치 시 닫히게 설정
         window?.attributes = params
         window?.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
@@ -70,7 +80,7 @@ class EmbedDialogImgFragment : DialogFragment() {
      */
     private fun replaceFragment(fragment: Fragment) {
         requireActivity().supportFragmentManager.beginTransaction()
-            .replace(R.id.fragmentCotainer, fragment)
+            .replace(R.id.fragmentContainer, fragment)
             .commit()
     }
 
