@@ -27,15 +27,15 @@ import retrofit2.converter.gson.GsonConverterFactory
 class EmbedGenerateQRFragment : Fragment() {
     lateinit var binding: FragmentEmbedGenerateQrBinding
     var uid: Int = 0
-    var date: Int = 0
+    var date: Long = 0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         // dialog로부터 QR에 넣을 정보를 받는다.
         setFragmentResultListener("qrData") { requestKey, bundle ->
-            // string -> int로 형변환
+            // string -> int, long로 형변환
             uid = bundle.getInt("id", 0)
-            date = bundle.getInt("date", 0)
+            date = bundle.getLong("date", 0)
 
             // 데이터를 받은 후 네트워크 요청 시작
             loadData()
