@@ -61,7 +61,7 @@ dependencies {
     // OkHttp 로깅 인터셉터 추가
     implementation ("com.squareup.okhttp3:logging-interceptor:4.9.3")
     // glide
-    implementation ("com.github.bumptech.glide:glide:4.12.0")
-    annotationProcessor ("com.github.bumptech.glide:compiler:4.12.0")
+    implementation ("com.github.bumptech.glide:glide:4.16.0")
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.16.0")
 
 }

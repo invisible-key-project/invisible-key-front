@@ -129,25 +129,8 @@ class EmbedSelectFragment : Fragment() {
                         binding.progressBar.visibility = View.VISIBLE
                     }
 
-                    // Gilde로 이미지 로드
-                    val bitmap = withContext(Dispatchers.IO) {
-                        Glide.with(requireContext())
-                            .asBitmap()
-                            .load(it)
-                            .submit()
-                            .get()
-                    }
-
-                    // 비트맵을 파일로 저장
-                    val imgPath = withContext(Dispatchers.IO) {
-                        saveBitmapToFile(bitmap, "selected_img.png", requireContext())
-                    }
+                    val imgPath = it.toString()
                     Log.d("fraglog", "setGallery: imgPath = $imgPath")
-
-                    // 파일 삭제 작업 예약
-                    imgPath?.let { path ->
-                        scheduleFileDeletion(File(path))
-                    }
 
                     // 다음 프래그먼트로 전환
                     withContext(Dispatchers.Main) {
