@@ -58,7 +58,10 @@ dependencies {
     implementation("androidx.work:work-runtime-ktx:2.7.1") // worker manager
     implementation("androidx.exifinterface:exifinterface:1.3.7") // exif
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9") // coroutines
-
     // OkHttp 로깅 인터셉터 추가
     implementation ("com.squareup.okhttp3:logging-interceptor:4.9.3")
+    // glide
+    implementation ("com.github.bumptech.glide:glide:4.16.0")
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.16.0")
+
 }

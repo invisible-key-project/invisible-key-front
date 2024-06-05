@@ -3,6 +3,10 @@ package com.example.transparentkey_aos
 import android.content.ContentValues
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
+import android.graphics.drawable.Drawable
+import android.media.ExifInterface
+import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
@@ -13,9 +17,16 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
+import androidx.lifecycle.lifecycleScope
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.transition.Transition
 import com.example.transparentkey_aos.databinding.FragmentEmbedBinding
 import com.example.transparentkey_aos.retrofit2.QRModel
 import com.example.transparentkey_aos.retrofit2.RetrofitClient
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -27,11 +38,12 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.IOException
 
 class EmbedFragment : Fragment() {
     lateinit var binding: FragmentEmbedBinding
     lateinit var wmImg: Bitmap
-    lateinit var selected_img_path: String
+    lateinit var selectedImgUri: Uri
     var bitmap: Bitmap? = null
 
 
@@ -52,36 +64,40 @@ class EmbedFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // 워터마크 할 이미지 수신
-        setFragmentResultListener("selected_embed_img_path") { key, bundle ->
-            val filePath = bundle.getString("selected_embed_img_path")
-            if (filePath != null) {
-                selected_img_path = filePath
-                Log.d("fraglog", "selected_img_path initialized: $selected_img_path")
+        setFragmentResultListener("selected_embed_img_path") { _, bundle ->
+            val imgPath = bundle.getString("selected_embed_img_path")
+            val imgUri = Uri.parse(imgPath)
+            Log.d("fraglog", "embedfragment-onCreateView: imgUri = $imgUri")
+
+            if (imgPath != null) {
+                selectedImgUri = imgUri
+                Log.d("fraglog", "selected_img_path initialized: $selectedImgUri")
             } else {
                 Toast.makeText(context, "선택한 이미지 경로를 불러오는데 실패했습니다.", Toast.LENGTH_SHORT).show()
             }
         }
 
         // type 수신
-        setFragmentResultListener("wmSelection") { key, bundle ->
+        setFragmentResultListener("wmSelection") { _, bundle ->
             val selection = bundle.getInt("selection", -1)
             when (selection) {
                 // qr 선택한 경우 실행
                 1 -> {
-                    setFragmentResultListener("qr_img") { key, bundle ->
+                    setFragmentResultListener("qr_img") { _, bundle ->
                         val img: Bitmap? = bundle.getParcelable("qr_img")
                         if (img != null) {
                             wmImg = img
                             binding.ivWmImage.setImageBitmap(wmImg)
 
-                            if (::selected_img_path.isInitialized) {
-                                val selected_img = BitmapFactory.decodeFile(selected_img_path)
-                                uploadImages(selected_img, wmImg)
+                            if (::selectedImgUri.isInitialized) {
+                                loadImageAndUpload()
                             } else {
-                                Toast.makeText(context, "이미지 경로가 초기화되지 않았습니다.", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "이미지 경로가 초기화되지 않았습니다.", Toast.LENGTH_SHORT)
+                                    .show()
                             }
                         } else {
-                            Toast.makeText(context, "워터마크 이미지를 불러오는데 실패했습니다.", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "워터마크 이미지를 불러오는데 실패했습니다.", Toast.LENGTH_SHORT)
+                                .show()
                         }
                     }
                 }
@@ -89,39 +105,53 @@ class EmbedFragment : Fragment() {
                 // img
                 // 워터마크 이미지 수신
                 2 -> {
-                    parentFragmentManager.setFragmentResultListener("wmimg_embed", this) { _, bundle ->
+                    setFragmentResultListener("wmimg_embed") { _, bundle ->
                         val imgPath = bundle.getString("wmimg_embed")
-                        Log.d("fraglog", "embedFragment(image selected)---onCreateView: imgPath = $imgPath")
-                        imgPath?.let {
-                            val file = File(it)
-                            if (file.exists()) {
-                                Log.d("fraglog", "File exists: $it")
-
-                                // selected_img_path가 초기화되었을 때만 실행
-                                if (::selected_img_path.isInitialized) {
-                                    // selected_img 비트맵으로 불러오기
-                                    val selected_img = BitmapFactory.decodeFile(selected_img_path)
-
-                                    // 워터마크 이미지 비트맵으로 불러오기
-                                    wmImg = BitmapFactory.decodeFile(it)
-                                    if (wmImg != null) {
-                                        binding.ivWmImage.setImageBitmap(bitmap)
-
-                                        // 서버에 업로드
-                                        uploadImages(selected_img, wmImg)
-                                    } else {
-                                        Log.e("fraglog", "BitmapFactory.decodeFile returned null for path: $it")
+                        Log.d(
+                            "fraglog",
+                            "embedFragment(image selected)---onCreateView: imgPath = $imgPath"
+                        )
+                        imgPath?.let { path ->
+                            // content URI로 처리
+                            val imgUri = Uri.parse(imgPath)
+                            Glide.with(requireContext())
+                                .asBitmap()
+                                .load(imgUri)
+                                .into(object : CustomTarget<Bitmap>() {
+                                    override fun onResourceReady(
+                                        resource: Bitmap,
+                                        transition: Transition<in Bitmap>?
+                                    ) {
+                                        Log.d(
+                                            "fraglog",
+                                            "embedfragment---glide load success : $imgUri"
+                                        )
+                                        // 비트맵 로드 성공 시
+                                        if (::selectedImgUri.isInitialized) {
+                                            loadImageAndWatermark(imgUri)
+                                        } else {
+                                            Toast.makeText(
+                                                context,
+                                                "이미지 경로가 초기화되지 않았습니다.",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
                                     }
-                                } else {
-                                    Toast.makeText(context, "이미지 경로가 초기화되지 않았습니다.", Toast.LENGTH_SHORT).show()
-                                }
-                            } else {
-                                Log.e("fraglog", "File does not exist: $it")
-                            }
+
+                                    override fun onLoadCleared(placeholder: Drawable?) {
+                                        // 필요 시 플레이스홀더 처리
+                                    }
+
+                                    override fun onLoadFailed(errorDrawable: Drawable?) {
+                                        Log.e(
+                                            "fraglog",
+                                            "embedfrag--Glide failed to load image for URI: $imgUri"
+                                        )
+                                    }
+                                })
                         }
+
                     }
-
-
                 }
 
                 else -> {
@@ -138,6 +168,36 @@ class EmbedFragment : Fragment() {
         }
     }
 
+    /**
+     * Load image rotate and watermark : qr watermark
+     */
+    private fun loadImageAndUpload() {
+        lifecycleScope.launch {
+            val rotatedBitmap = withContext(Dispatchers.IO) {
+                val originalBitmap =
+                    Glide.with(requireContext()).asBitmap().load(selectedImgUri).submit().get()
+                rotateImageIfRequired(originalBitmap, selectedImgUri)
+            }
+            uploadImages(rotatedBitmap, wmImg)
+        }
+    }
+
+    /**
+     * Load image rotate and watermark : img watermark
+     */
+    private fun loadImageAndWatermark(path: Uri) {
+        lifecycleScope.launch {
+            val selectedImg = withContext(Dispatchers.IO) {
+                Glide.with(requireContext()).asBitmap().load(selectedImgUri).submit().get()
+            }
+            val wmImgBitmap = withContext(Dispatchers.IO) {
+                Glide.with(requireContext()).asBitmap().load(path).submit().get()
+            }
+            wmImg = wmImgBitmap
+            binding.ivWmImage.setImageBitmap(wmImg)
+            uploadImages(selectedImg, wmImg)
+        }
+    }
 
     /**
      * Apply watermark
@@ -155,12 +215,10 @@ class EmbedFragment : Fragment() {
         wm_img?.compress(Bitmap.CompressFormat.PNG, 100, stream2)
         val byteArray2 = stream2.toByteArray()
 
-//        val requestFile1 = RequestBody.create(MediaType.parse("image/jpeg"), byteArray1)
         val requestFile1 = byteArray1.toRequestBody("image/jpeg".toMediaTypeOrNull())
         val body1 =
             MultipartBody.Part.createFormData("background_img", "background_img.jpg", requestFile1)
 
-//        val requestFile2 = RequestBody.create(MediaType.parse("image/png"), byteArray2)
         val requestFile2 = byteArray2.toRequestBody("image/jpeg".toMediaTypeOrNull())
         val body2 = MultipartBody.Part.createFormData("wm_img", "wm_img.png", requestFile2)
 
@@ -223,5 +281,36 @@ class EmbedFragment : Fragment() {
         } ?: Toast.makeText(context, "이미지 저장 실패", Toast.LENGTH_SHORT).show()
     }
 
+    /**
+     * if Required, call Rotate Image
+     */
+    fun rotateImageIfRequired(img: Bitmap, imageUri: Uri): Bitmap {
+        val ei: ExifInterface = try {
+            ExifInterface(requireContext().contentResolver.openInputStream(imageUri)!!)
+        } catch (e: IOException) {
+            e.printStackTrace()
+            return img
+        }
+
+        val orientation: Int =
+            ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
+        return when (orientation) {
+            ExifInterface.ORIENTATION_ROTATE_90 -> rotateImage(img, 90f)
+            ExifInterface.ORIENTATION_ROTATE_180 -> rotateImage(img, 180f)
+            ExifInterface.ORIENTATION_ROTATE_270 -> rotateImage(img, 270f)
+            else -> img
+        }
+    }
+
+    /**
+     * Rotate Img
+     */
+    private fun rotateImage(img: Bitmap, degree: Float): Bitmap {
+        // Matrix 객체를 생성하여 회전 변환을 적용
+        val matrix = Matrix()
+        matrix.postRotate(degree)
+        // 회전된 비트맵을 생성하여 반환
+        return Bitmap.createBitmap(img, 0, 0, img.width, img.height, matrix, true)
+    }
 
 }

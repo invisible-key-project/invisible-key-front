@@ -24,6 +24,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.work.Data
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
+import com.bumptech.glide.Glide
 import com.example.transparentkey_aos.databinding.FragmentEmbedSelectBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -84,11 +85,15 @@ class EmbedSelectFragment : Fragment() {
                     binding.progressBar.visibility = View.VISIBLE
                 }
 
-                val imageBitmap = withContext(Dispatchers.IO) {
-                    BitmapFactory.decodeFile(photoFile.absolutePath)
-                }
+                // Glide를 사용하여 이미지 로드 및 회전 처리
                 val rotatedBitmap = withContext(Dispatchers.IO) {
-                    rotateImageIfRequired(imageBitmap, photoFile.absolutePath)
+                    val originalBitmap = Glide.with(requireContext())
+                        .asBitmap()
+                        .load(photoFile)
+                        .submit()
+                        .get()
+
+                    rotateImageIfRequired(originalBitmap, photoFile.absolutePath)
                 }
 
                 // 비트맵을 파일로 저장
@@ -124,15 +129,8 @@ class EmbedSelectFragment : Fragment() {
                         binding.progressBar.visibility = View.VISIBLE
                     }
 
-                    val imgPath = withContext(Dispatchers.IO) {
-                        copyUriToInternalStorage(it, requireContext())
-                    }
+                    val imgPath = it.toString()
                     Log.d("fraglog", "setGallery: imgPath = $imgPath")
-
-                    // 파일 삭제 작업 예약
-                    imgPath?.let { path ->
-                        scheduleFileDeletion(File(path))
-                    }
 
                     // 다음 프래그먼트로 전환
                     withContext(Dispatchers.Main) {
@@ -306,6 +304,8 @@ class EmbedSelectFragment : Fragment() {
 
         return file.absolutePath
     }
+
+
 
 
 

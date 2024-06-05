@@ -15,12 +15,13 @@ import com.example.transparentkey_aos.databinding.FragmentEmbedDialogBinding
 import com.example.transparentkey_aos.databinding.FragmentEmbedSelectBinding
 import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Locale
 
 class EmbedDialogFragment : DialogFragment() {
     private lateinit var binding: FragmentEmbedDialogBinding
     private var id: Int = 0
     private lateinit var name: String
-    private var date: Int = 0
+    private var date: Long = 0
 
         override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,7 +45,7 @@ class EmbedDialogFragment : DialogFragment() {
 
         val stringDate = getCurrentDateFormatted() // get current time
         val formattedDate = formatDateStringUsingChunk(stringDate) // formatting date
-        date = stringDate.toInt()
+        date = stringDate.toLong() // 포맷하지 않은 날짜정보를 Long으로 변환
 
 
         binding.tvDlIdRes.text = id.toString()
@@ -84,7 +85,7 @@ class EmbedDialogFragment : DialogFragment() {
      */
 
     fun getCurrentDateFormatted(): String {
-        val dateFormat = SimpleDateFormat("yyMMdd")
+        val dateFormat = SimpleDateFormat("yyMMddHHmm", Locale.getDefault())
         val currentDate = Date() // 현재 날짜와 시간을 가져옴
         return dateFormat.format(currentDate) // 'yyMMdd' 형식으로 날짜를 포맷
     }
@@ -93,7 +94,18 @@ class EmbedDialogFragment : DialogFragment() {
      * chunk date string
      */
     fun formatDateStringUsingChunk(dateStr: String): String {
-        return dateStr.chunked(2).joinToString(separator = ".")
+        // 날짜와 시간 부분을 분리
+        val datePart = dateStr.substring(0, 6) // "230603"
+        val timePart = dateStr.substring(6) // "1230"
+
+        // 날짜 부분을 포맷
+        val formattedDatePart = datePart.chunked(2).joinToString(separator = ".")
+
+        // 시간 부분을 포맷
+        val formattedTimePart = timePart.chunked(2).joinToString(separator = ":")
+
+        // 날짜와 시간 부분을 결합하여 반환
+        return "$formattedDatePart. $formattedTimePart"
     }
 
 }

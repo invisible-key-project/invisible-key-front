@@ -70,15 +70,8 @@ class EmbedImageSelectFragment : Fragment() {
                         binding.progressBar.visibility = View.VISIBLE
                     }
 
-                    val imgPath = withContext(Dispatchers.IO) {
-                        copyUriToInternalStorage(it, requireContext())
-                    }
+                    val imgPath = it.toString()
                     Log.d("fraglog", "setGallery: imgPath = $imgPath")
-
-                    // 파일 삭제 작업 예약
-                    imgPath?.let { path ->
-                        scheduleFileDeletion(File(path))
-                    }
 
                     // 다음 프래그먼트로 전환
                     withContext(Dispatchers.Main) {
@@ -100,62 +93,6 @@ class EmbedImageSelectFragment : Fragment() {
                 }
             }
         }
-    }
-
-    /**
-     * Copy gallery img
-     */
-    private fun copyUriToInternalStorage(uri: Uri, context: Context): String? {
-        val inputStream = context.contentResolver.openInputStream(uri)
-        val fileName = uri.lastPathSegment?.split("/")?.last() ?: "temp_img"
-        val file = File(context.filesDir, fileName)
-
-        if (inputStream == null) {
-            Log.e("fraglog", "Failed to open input stream for URI: $uri")
-            return null
-        }
-
-        try {
-            val outputStream = FileOutputStream(file)
-            inputStream.use { input ->
-                outputStream.use { output ->
-                    input.copyTo(output)
-                }
-            }
-        } catch (e: Exception) {
-            Log.e("fraglog", "Error copying file: ${e.message}")
-            e.printStackTrace()
-            return null
-        }
-
-        // Check if the file was successfully copied
-        if (!file.exists()) {
-            Log.e("fraglog", "File was not successfully copied")
-            return null
-        }
-
-        // Decode the copied file to a bitmap
-        val tempBitmap = BitmapFactory.decodeFile(file.absolutePath)
-        if (tempBitmap == null) {
-            Log.e("fraglog", "decodeFile(${file.absolutePath}) returned null")
-            return null
-        }
-
-        // Rotate the image if required
-        val rotatedBitmap = rotateImageIfRequired(tempBitmap, file.absolutePath)
-
-        // Save rotated bitmap to internal storage
-        try {
-            FileOutputStream(file).use { fos ->
-                rotatedBitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
-            }
-        } catch (e: IOException) {
-            Log.e("fraglog", "Error saving rotated bitmap to file: ${e.message}")
-            e.printStackTrace()
-            return null
-        }
-
-        return file.absolutePath
     }
 
     /**
