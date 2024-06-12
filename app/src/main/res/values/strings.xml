@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">TransparentKey_AOS</string>
     <string name="recommend_pixel">(64X64 권장)</string>
+    <string name="manage_upload_btn_desc">새 워터마크 가져오기</string>
 </resources>
