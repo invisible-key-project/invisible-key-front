@@ -174,9 +174,7 @@ class EmbedFragment : Fragment() {
     private fun loadImageAndUpload() {
         lifecycleScope.launch {
             val rotatedBitmap = withContext(Dispatchers.IO) {
-                val originalBitmap =
                     Glide.with(requireContext()).asBitmap().load(selectedImgUri).submit().get()
-                rotateImageIfRequired(originalBitmap, selectedImgUri)
             }
             uploadImages(rotatedBitmap, wmImg)
         }
