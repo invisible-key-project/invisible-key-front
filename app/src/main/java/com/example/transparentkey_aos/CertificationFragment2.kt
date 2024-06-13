@@ -61,8 +61,11 @@ class CertificationFragment2 : Fragment() {
         val year = date.substring(0..1)
         val month = date.substring(2..3)
         val day = date.substring(4..5)
+        val hour = date.substring(6 .. 7)
+        val minute = date.substring(8 .. 9)
 
-        return "$year 년 $month 월 $day 일"
+        return "${year}년 ${month}월 ${day}일 ${hour}:${minute}"
+
     }
 
     fun returnToMainFragment() {
