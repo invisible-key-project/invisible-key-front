@@ -10,10 +10,10 @@
         android:id="@+id/cert2_title_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="워터마크 추출 결과"
-        android:textSize="20sp"
+        android:layout_marginTop="48dp"
         android:fontFamily="@font/pretendard_bold"
+        android:text="워터마크 인증 성공!"
+        android:textSize="22sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -22,8 +22,8 @@
         android:id="@+id/cert2_result_iv"
         android:layout_width="150dp"
         android:layout_height="150dp"
+        android:layout_marginTop="32dp"
         android:maxWidth="300dp"
-        android:layout_marginTop="100dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/cert2_title_tv" />
@@ -32,14 +32,14 @@
         android:id="@+id/cert2_title2_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="60dp"
-        android:layout_marginTop="60dp"
-        android:text="워터마크 데이터"
-        android:textSize="18sp"
+        android:layout_marginStart="56dp"
+        android:layout_marginTop="32dp"
         android:fontFamily="@font/pretendard_bold"
+        android:text="워터마크 데이터"
+        android:textSize="17sp"
+        app:layout_constraintBottom_toTopOf="@+id/cert2_result_grid"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/cert2_result_iv"
-        app:layout_constraintBottom_toTopOf="@+id/cert2_result_grid"/>
+        app:layout_constraintTop_toBottomOf="@id/cert2_result_iv" />
 
     <GridLayout
         android:id="@+id/cert2_result_grid"
@@ -53,37 +53,46 @@
 
         <TextView
             android:text="이름: "
-            android:fontFamily="@font/pretendard_regular"/>
+            android:textSize="15dp"
+            android:fontFamily="@font/pretendard_regular"
+            android:layout_margin="2dp"/>
         <TextView
             android:id="@+id/cert2_name_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="홍길동"
-            android:textSize="16sp"
+            android:textSize="15dp"
+            android:layout_margin="2dp"
             android:layout_marginLeft="8dp"
-            android:fontFamily="@font/pretendard_regular"
+            android:fontFamily="@font/pretendard_bold"
             />
 
         <TextView
-            android:text="닉네임: "
+            android:text="사용자: "
+            android:layout_margin="2dp"
+            android:textSize="15dp"
             android:fontFamily="@font/pretendard_regular"/>
         <TextView
             android:id="@+id/cert2_id_tv"
+            android:layout_margin="2dp"
             android:text="HongGildong"
-            android:textSize="16sp"
             android:layout_marginLeft="8dp"
-            android:fontFamily="@font/pretendard_regular"/>
+            android:textSize="15dp"
+            android:fontFamily="@font/pretendard_bold"/>
 
         <TextView
             android:text="삽입날짜:  "
+            android:layout_margin="2dp"
+            android:textSize="15dp"
             android:fontFamily="@font/pretendard_regular"/>
 
         <TextView
             android:id="@+id/cert2_date_tv"
+            android:layout_margin="2dp"
             android:text="2000.00.00"
-            android:textSize="16sp"
+            android:textSize="15dp"
             android:layout_marginLeft="8dp"
-            android:fontFamily="@font/pretendard_regular"/>
+            android:fontFamily="@font/pretendard_bold"/>
 
         <!--        <TextView-->
         <!--            android:id="@+id/cert2_title3_tv"-->
@@ -111,7 +120,6 @@
         android:id="@+id/cert2_end_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="56dp"
         android:fontFamily="@font/pretendard_bold"
         android:text="홈으로 돌아가기"
         app:layout_constraintBottom_toBottomOf="parent"
