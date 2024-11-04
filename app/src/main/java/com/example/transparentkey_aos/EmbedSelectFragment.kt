@@ -1,5 +1,6 @@
 package com.example.transparentkey_aos
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.database.Cursor
@@ -14,6 +15,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
@@ -42,8 +44,15 @@ class EmbedSelectFragment : Fragment() {
     val REQUEST_IMAGE_CAPTURE = 1 // 카메라 사진 촬영 요청 코드
     private lateinit var photoFile: File // 파일 생성 시 사용
     private val REQUEST_KEY = "selected_img_path" // 요청 키
-    private var launcher = registerForActivityResult(ActivityResultContracts.GetContent()) { it ->
-        setGallery(uri = it)
+    private val imageRequestLauncher: ActivityResultLauncher<Intent> = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val imageUri = result.data?.data
+            imageUri?.let {
+                setGallery(it)
+            }
+        }
     }
 
     override fun onCreateView(
@@ -66,8 +75,16 @@ class EmbedSelectFragment : Fragment() {
             startActivityForResult(intent, REQUEST_IMAGE_CAPTURE)
         }
         binding.btnPhotos.setOnClickListener {
-            launcher.launch("image/*")
+            openGallery()
         }
+    }
+
+    /**
+     * 갤러리 실행
+     */
+    private fun openGallery() {
+        val galleryIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        imageRequestLauncher.launch(galleryIntent)
     }
 
     /**
@@ -85,25 +102,11 @@ class EmbedSelectFragment : Fragment() {
                     binding.progressBar.visibility = View.VISIBLE
                 }
 
-                // Glide를 사용하여 이미지 로드 및 회전 처리
-                val rotatedBitmap = withContext(Dispatchers.IO) {
-                    val originalBitmap = Glide.with(requireContext())
-                        .asBitmap()
-                        .load(photoFile)
-                        .submit()
-                        .get()
-
-                    rotateImageIfRequired(originalBitmap, photoFile.absolutePath)
-                }
-
-                // 비트맵을 파일로 저장
-                val filePath = withContext(Dispatchers.IO) {
-                    saveBitmapToFile(rotatedBitmap, "selected_img.png", requireContext())
-                }
+                val filePath = Uri.fromFile(photoFile)
 
                 // 프래그먼트 이동 및 데이터 전달
                 withContext(Dispatchers.Main) {
-                    replaceFragment(EmbedWatermarkSelectFragment(), filePath) // 사진의 경로 전송
+                    replaceFragment(EmbedWatermarkSelectFragment(), filePath.toString()) // 사진의 경로 전송
 
                     // 로딩 애니메이션 중지
                     binding.progressBar.visibility = View.INVISIBLE

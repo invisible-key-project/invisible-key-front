@@ -258,26 +258,42 @@ class EmbedFragment : Fragment() {
     /**
      * Save watermarked image
      */
-    fun saveImageToStorage(bitmap: Bitmap) {
-        val appName = getString(R.string.app_name)  // 앱 이름 가져오기
+    private fun saveImageToStorage(bitmap: Bitmap) {
         val filename = "watermarked_${System.currentTimeMillis()}.jpg"
         val contentValues = ContentValues().apply {
-            put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
-            put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
-            put(
-                MediaStore.MediaColumns.RELATIVE_PATH,
-                "${Environment.DIRECTORY_PICTURES}/$appName"
-            )  // 경로 설정
+            put(MediaStore.Images.Media.DISPLAY_NAME, filename)  // 파일 이름
+            put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")  // MIME 타입
+            // Oreo에서는 Scoped Storage가 적용되지 않으므로, 상대 경로 대신 절대 경로를 사용
         }
 
+        // 절대 경로를 사용하여 파일 경로 설정
+        val picturesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+        val file = File(picturesDir, filename)
+
+        // Content Resolver를 통해 URI 생성
         val resolver = context?.contentResolver
         val uri = resolver?.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
-        uri?.let {
-            resolver.openOutputStream(it)?.use { outputStream ->
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
-                Toast.makeText(context, "이미지 저장 성공: $filename", Toast.LENGTH_LONG).show()
-            } ?: Toast.makeText(context, "파일을 저장할 수 없습니다.", Toast.LENGTH_SHORT).show()
-        } ?: Toast.makeText(context, "이미지 저장 실패", Toast.LENGTH_SHORT).show()
+
+        Log.d("SaveImage", "Generated URI: $uri") // URI 디버깅 로그
+        Log.d("SaveImage", "ContentValues: $contentValues") // ContentValues 로그
+
+        if (uri != null) {
+            try {
+                resolver.openOutputStream(uri)?.use { outputStream ->
+                    if (bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)) {
+                        Toast.makeText(context, "이미지 저장 성공: $filename", Toast.LENGTH_LONG).show()
+                    } else {
+                        Toast.makeText(context, "이미지 저장 실패", Toast.LENGTH_SHORT).show()
+                    }
+                } ?: Toast.makeText(context, "파일을 저장할 수 없습니다.", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                Log.e("SaveImage", "Error saving image: ${e.message}")
+                Toast.makeText(context, "파일을 저장하는 동안 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            Log.e("SaveImage", "Failed to get URI. Check your ContentValues.")
+            Toast.makeText(context, "이미지 저장 실패: URI가 null입니다.", Toast.LENGTH_SHORT).show()
+        }
     }
 
     /**
