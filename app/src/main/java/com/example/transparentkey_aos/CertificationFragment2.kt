@@ -33,30 +33,51 @@ class CertificationFragment2 : Fragment() {
 
         // ViewModel 인스턴스 가져오기
         val viewModel = ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
-
-        // LiveData 관찰
         viewModel.serverResponse.observe(viewLifecycleOwner, Observer { serverResponse ->
-            // serverResponse 사용
-            binding.cert2IdTv.text = serverResponse.userId
+            if (serverResponse.userId.isNullOrEmpty() || serverResponse.date.isNullOrEmpty()) {
+                // 데이터가 비어 있으면 에러 메시지 표시
+                binding.cret2ErrorTv.visibility = View.VISIBLE
+                binding.cert1Gridlayout.visibility = View.GONE
+            } else {
+                // 데이터가 있으면 정상적으로 GridLayout 표시
+                binding.cret2ErrorTv.visibility = View.GONE
+                binding.cert1Gridlayout.visibility = View.VISIBLE
 
-            val formattedDate = simpleFormatDateString(serverResponse.date)
-            println(formattedDate)
-            binding.cert2DateTv.text = formattedDate
+                // 데이터가 있을 경우 설정
+                binding.cert2IdTv.text = serverResponse.userId
+                val formattedDate = simpleFormatDateString(serverResponse.date)
+                binding.cert2DateTv.text = formattedDate
+            }
         })
 
-        binding.cert2EndBtn.setOnClickListener {
-            // ImageStorage 초기화
-            CertificationFragment1.ImageStorage.clear()
+        // arguments에서 에러 상태 확인
+        arguments?.let {
+            val isError = it.getBoolean("isError", false)
+            val errorMessage = it.getString("errorMessage", "")
 
-            // MainFragment로 돌아가기
-            returnToMainFragment()
+            if (isError) {
+                binding.cret2ErrorTv.text = errorMessage
+                binding.cret2ErrorTv.visibility = View.VISIBLE
+                binding.cert1Gridlayout.visibility = View.GONE
+            } else {
+                binding.cret2ErrorTv.visibility = View.GONE
+                binding.cert1Gridlayout.visibility = View.VISIBLE
+            }
         }
 
+        binding.cert2EndBtn.setOnClickListener {
+            CertificationFragment1.ImageStorage.clear()
+            returnToMainFragment()
+        }
 
         return binding.root
     }
 
     fun simpleFormatDateString(date: String): String {
+        if (date.isNullOrEmpty()) {
+            // 기본 메시지를 반환하거나 예외를 처리
+            return "날짜 정보 없음"
+        }
         // 날짜 형식: YYMMDD
         val year = date.substring(0..1)
         val month = date.substring(2..3)

@@ -71,7 +71,14 @@ class EmbedFragment : Fragment() {
 
             if (imgPath != null) {
                 selectedImgUri = imgUri
-                Log.d("fraglog", "selected_img_path initialized: $selectedImgUri")
+                Log.d("EmbedFragment", "selected_img_path initialized: $selectedImgUri")
+
+                val file = File("/data/user/0/com.example.transparentkey_aos/files/selected_img.png")
+                if (file.exists()) {
+                    Log.d("EmbedFragment", "File exists at the specified path")
+                } else {
+                    Log.e("EmbedFragment", "File does not exist at the specified path")
+                }
             } else {
                 Toast.makeText(context, "선택한 이미지 경로를 불러오는데 실패했습니다.", Toast.LENGTH_SHORT).show()
             }
@@ -108,7 +115,7 @@ class EmbedFragment : Fragment() {
                     setFragmentResultListener("wmimg_embed") { _, bundle ->
                         val imgPath = bundle.getString("wmimg_embed")
                         Log.d(
-                            "fraglog",
+                            "EmbedFragment",
                             "embedFragment(image selected)---onCreateView: imgPath = $imgPath"
                         )
                         imgPath?.let { path ->
@@ -123,7 +130,7 @@ class EmbedFragment : Fragment() {
                                         transition: Transition<in Bitmap>?
                                     ) {
                                         Log.d(
-                                            "fraglog",
+                                            "EmbedFragment",
                                             "embedfragment---glide load success : $imgUri"
                                         )
                                         // 비트맵 로드 성공 시
@@ -143,10 +150,7 @@ class EmbedFragment : Fragment() {
                                     }
 
                                     override fun onLoadFailed(errorDrawable: Drawable?) {
-                                        Log.e(
-                                            "fraglog",
-                                            "embedfrag--Glide failed to load image for URI: $imgUri"
-                                        )
+                                        Log.e("EmbedFragment", "Glide failed to load image for URI: $imgUri, check if file exists or format is supported")
                                     }
                                 })
                         }
@@ -180,9 +184,6 @@ class EmbedFragment : Fragment() {
         }
     }
 
-    /**
-     * Load image rotate and watermark : img watermark
-     */
     private fun loadImageAndWatermark(path: Uri) {
         lifecycleScope.launch {
             val selectedImg = withContext(Dispatchers.IO) {
@@ -298,33 +299,34 @@ class EmbedFragment : Fragment() {
     /**
      * if Required, call Rotate Image
      */
-    fun rotateImageIfRequired(img: Bitmap, imageUri: Uri): Bitmap {
-        val ei: ExifInterface = try {
-            ExifInterface(requireContext().contentResolver.openInputStream(imageUri)!!)
-        } catch (e: IOException) {
-            e.printStackTrace()
-            return img
-        }
-
-        val orientation: Int =
-            ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
-        return when (orientation) {
-            ExifInterface.ORIENTATION_ROTATE_90 -> rotateImage(img, 90f)
-            ExifInterface.ORIENTATION_ROTATE_180 -> rotateImage(img, 180f)
-            ExifInterface.ORIENTATION_ROTATE_270 -> rotateImage(img, 270f)
-            else -> img
-        }
-    }
+//    fun rotateImageIfRequired(img: Bitmap, imageUri: Uri): Bitmap {
+//        val ei: ExifInterface = try {
+//            ExifInterface(requireContext().contentResolver.openInputStream(imageUri)!!)
+//        } catch (e: IOException) {
+//            e.printStackTrace()
+//            return img
+//        }
+//
+//        val orientation: Int =
+//            ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
+//        return when (orientation) {
+//            ExifInterface.ORIENTATION_ROTATE_90 -> rotateImage(img, 90f)
+//            ExifInterface.ORIENTATION_ROTATE_180 -> rotateImage(img, 180f)
+//            ExifInterface.ORIENTATION_ROTATE_270 -> rotateImage(img, 270f)
+//            else -> img
+//        }
+//    }
 
     /**
      * Rotate Img
      */
-    private fun rotateImage(img: Bitmap, degree: Float): Bitmap {
-        // Matrix 객체를 생성하여 회전 변환을 적용
-        val matrix = Matrix()
-        matrix.postRotate(degree)
-        // 회전된 비트맵을 생성하여 반환
-        return Bitmap.createBitmap(img, 0, 0, img.width, img.height, matrix, true)
-    }
+
+//    private fun rotateImage(img: Bitmap, degree: Float): Bitmap {
+//        // Matrix 객체를 생성하여 회전 변환을 적용
+//        val matrix = Matrix()
+//        matrix.postRotate(degree)
+//        // 회전된 비트맵을 생성하여 반환
+//        return Bitmap.createBitmap(img, 0, 0, img.width, img.height, matrix, true)
+//    }
 
 }
