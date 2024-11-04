@@ -40,6 +40,7 @@
         app:layout_constraintTop_toBottomOf="@id/cert2_result_iv" />
 
     <GridLayout
+        android:id="@+id/cert1_gridlayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:columnCount="2"
@@ -72,27 +73,18 @@
             android:text="2000.00.00"
             android:textSize="16sp" />
 
-        <TextView
-            android:id="@+id/cert2_title3_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
-            android:text="이미지 정보"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:layout_columnSpan="2"/>
-
-        <TextView
-            android:text="훼손율: "/>
-
-        <TextView
-            android:id="@+id/cert2_image_result_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-
-            android:text="10.00%"
-            android:textSize="16sp" />
     </GridLayout>
+
+    <TextView
+        android:id="@+id/cret2_error_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="QR 데이터가 없거나 손상되었습니다."
+        app:layout_constraintTop_toBottomOf="@id/cert1_gridlayout"
+        app:layout_constraintStart_toStartOf="@id/cert1_gridlayout"
+        android:textColor="#ff0000"
+        android:visibility="visible"/>
+
 
     <Button
         android:id="@+id/cert2_end_btn"
@@ -102,8 +94,7 @@
         android:text="홈으로 돌아가기"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/cert2_image_result_tv" />
+        app:layout_constraintStart_toStartOf="parent" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
