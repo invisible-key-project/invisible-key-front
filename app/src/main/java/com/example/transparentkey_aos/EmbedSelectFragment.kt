@@ -102,25 +102,11 @@ class EmbedSelectFragment : Fragment() {
                     binding.progressBar.visibility = View.VISIBLE
                 }
 
-                // Glide를 사용하여 이미지 로드 및 회전 처리
-                val rotatedBitmap = withContext(Dispatchers.IO) {
-                    val originalBitmap = Glide.with(requireContext())
-                        .asBitmap()
-                        .load(photoFile)
-                        .submit()
-                        .get()
-
-                    rotateImageIfRequired(originalBitmap, photoFile.absolutePath)
-                }
-
-                // 비트맵을 파일로 저장
-                val filePath = withContext(Dispatchers.IO) {
-                    saveBitmapToFile(rotatedBitmap, "selected_img.png", requireContext())
-                }
+                val filePath = Uri.fromFile(photoFile)
 
                 // 프래그먼트 이동 및 데이터 전달
                 withContext(Dispatchers.Main) {
-                    replaceFragment(EmbedWatermarkSelectFragment(), filePath) // 사진의 경로 전송
+                    replaceFragment(EmbedWatermarkSelectFragment(), filePath.toString()) // 사진의 경로 전송
 
                     // 로딩 애니메이션 중지
                     binding.progressBar.visibility = View.INVISIBLE
