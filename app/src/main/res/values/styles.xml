@@ -4,6 +4,7 @@
     <style name="noAnimBottomNavigationView">
         <item name="android:animateLayoutChanges">false</item>
         <item name="android:transitionGroup">false</item>
+        <item name="android:fontFamily">@font/pretendard_medium</item>
     </style>
 
     <style name="Widget.BottomNavigationView" parent="Widget.MaterialComponents.BottomNavigationView">

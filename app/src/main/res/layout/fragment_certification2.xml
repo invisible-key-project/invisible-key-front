@@ -10,10 +10,10 @@
         android:id="@+id/cert2_title_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
-        android:text="워터마크 추출 결과"
-        android:textSize="20sp"
-        android:textStyle="bold"
+        android:layout_marginTop="48dp"
+        android:fontFamily="@font/pretendard_bold"
+        android:text="워터마크 인증 성공!"
+        android:textSize="22sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -22,7 +22,8 @@
         android:id="@+id/cert2_result_iv"
         android:layout_width="150dp"
         android:layout_height="150dp"
-        android:layout_marginTop="100dp"
+        android:layout_marginTop="32dp"
+        android:maxWidth="300dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/cert2_title_tv" />
@@ -31,79 +32,100 @@
         android:id="@+id/cert2_title2_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="60dp"
-        android:layout_marginTop="60dp"
+        android:layout_marginStart="56dp"
+        android:layout_marginTop="32dp"
+        android:fontFamily="@font/pretendard_bold"
         android:text="워터마크 데이터"
-        android:textSize="18sp"
-        android:textStyle="bold"
+        android:textSize="17sp"
+        app:layout_constraintBottom_toTopOf="@+id/cert2_result_grid"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/cert2_result_iv" />
 
     <GridLayout
+        android:id="@+id/cert2_result_grid"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:columnCount="2"
+        android:layout_marginTop="8dp"
         app:layout_constraintStart_toStartOf="@id/cert2_title2_tv"
         app:layout_constraintTop_toBottomOf="@id/cert2_title2_tv"
         >
 
         <TextView
-            android:text="이름: " />
+            android:text="이름: "
+            android:textSize="15dp"
+            android:fontFamily="@font/pretendard_regular"
+            android:layout_margin="2dp"/>
         <TextView
             android:id="@+id/cert2_name_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="홍길동"
-            android:textSize="16sp"
-             />
+            android:textSize="15dp"
+            android:layout_margin="2dp"
+            android:layout_marginLeft="8dp"
+            android:fontFamily="@font/pretendard_bold"
+            />
 
         <TextView
-            android:text="닉네임: "/>
+            android:text="사용자: "
+            android:layout_margin="2dp"
+            android:textSize="15dp"
+            android:fontFamily="@font/pretendard_regular"/>
         <TextView
             android:id="@+id/cert2_id_tv"
+            android:layout_margin="2dp"
             android:text="HongGildong"
-            android:textSize="16sp"/>
+            android:layout_marginLeft="8dp"
+            android:textSize="15dp"
+            android:fontFamily="@font/pretendard_bold"/>
 
         <TextView
-            android:text="삽입날짜:  "/>
+            android:text="삽입날짜:  "
+            android:layout_margin="2dp"
+            android:textSize="15dp"
+            android:fontFamily="@font/pretendard_regular"/>
 
         <TextView
             android:id="@+id/cert2_date_tv"
+            android:layout_margin="2dp"
             android:text="2000.00.00"
-            android:textSize="16sp" />
+            android:textSize="15dp"
+            android:layout_marginLeft="8dp"
+            android:fontFamily="@font/pretendard_bold"/>
 
-        <TextView
-            android:id="@+id/cert2_title3_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
-            android:text="이미지 정보"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:layout_columnSpan="2"/>
+        <!--        <TextView-->
+        <!--            android:id="@+id/cert2_title3_tv"-->
+        <!--            android:layout_width="wrap_content"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:layout_marginTop="30dp"-->
+        <!--            android:text="이미지 정보"-->
+        <!--            android:textSize="18sp"-->
+        <!--            android:textStyle="bold"-->
+        <!--            android:layout_columnSpan="2"/>-->
 
-        <TextView
-            android:text="훼손율: "/>
+        <!--        <TextView-->
+        <!--            android:text="훼손율: "/>-->
 
-        <TextView
-            android:id="@+id/cert2_image_result_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        <!--        <TextView-->
+        <!--            android:id="@+id/cert2_image_result_tv"-->
+        <!--            android:layout_width="wrap_content"-->
+        <!--            android:layout_height="wrap_content"-->
 
-            android:text="10.00%"
-            android:textSize="16sp" />
+        <!--            android:text="10.00%"-->
+        <!--            android:textSize="16sp" />-->
     </GridLayout>
 
     <Button
         android:id="@+id/cert2_end_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="20dp"
+        android:fontFamily="@font/pretendard_bold"
         android:text="홈으로 돌아가기"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/cert2_image_result_tv" />
+        app:layout_constraintTop_toBottomOf="@+id/cert2_result_grid" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
