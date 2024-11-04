@@ -9,7 +9,7 @@
         android:id="@+id/tv_embed_watermark"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="156dp"
+        android:layout_marginTop="130dp"
         android:fontFamily="@font/pretendard_bold"
         android:text="워터마크 이미지 선택"
         android:textColor="@color/black"

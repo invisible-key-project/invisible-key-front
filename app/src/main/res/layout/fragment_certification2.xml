@@ -52,7 +52,7 @@
         >
 
         <TextView
-            android:text="이름: "
+            android:text="닉네임: "
             android:textSize="15dp"
             android:fontFamily="@font/pretendard_regular"
             android:layout_margin="2dp"/>
@@ -68,7 +68,7 @@
             />
 
         <TextView
-            android:text="사용자: "
+            android:text="ID: "
             android:layout_margin="2dp"
             android:textSize="15dp"
             android:fontFamily="@font/pretendard_regular"/>
