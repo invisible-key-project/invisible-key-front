@@ -295,38 +295,4 @@ class EmbedFragment : Fragment() {
             Toast.makeText(context, "이미지 저장 실패: URI가 null입니다.", Toast.LENGTH_SHORT).show()
         }
     }
-
-    /**
-     * if Required, call Rotate Image
-     */
-//    fun rotateImageIfRequired(img: Bitmap, imageUri: Uri): Bitmap {
-//        val ei: ExifInterface = try {
-//            ExifInterface(requireContext().contentResolver.openInputStream(imageUri)!!)
-//        } catch (e: IOException) {
-//            e.printStackTrace()
-//            return img
-//        }
-//
-//        val orientation: Int =
-//            ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
-//        return when (orientation) {
-//            ExifInterface.ORIENTATION_ROTATE_90 -> rotateImage(img, 90f)
-//            ExifInterface.ORIENTATION_ROTATE_180 -> rotateImage(img, 180f)
-//            ExifInterface.ORIENTATION_ROTATE_270 -> rotateImage(img, 270f)
-//            else -> img
-//        }
-//    }
-
-    /**
-     * Rotate Img
-     */
-
-//    private fun rotateImage(img: Bitmap, degree: Float): Bitmap {
-//        // Matrix 객체를 생성하여 회전 변환을 적용
-//        val matrix = Matrix()
-//        matrix.postRotate(degree)
-//        // 회전된 비트맵을 생성하여 반환
-//        return Bitmap.createBitmap(img, 0, 0, img.width, img.height, matrix, true)
-//    }
-
 }
