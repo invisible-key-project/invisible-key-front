@@ -10,10 +10,10 @@
         android:id="@+id/cert2_title_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="48dp"
+        android:fontFamily="@font/pretendard_bold"
         android:text="워터마크 추출 결과"
-        android:textSize="20sp"
-        android:textStyle="bold"
+        android:textSize="22sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -22,7 +22,7 @@
         android:id="@+id/cert2_result_iv"
         android:layout_width="150dp"
         android:layout_height="150dp"
-        android:layout_marginTop="100dp"
+        android:layout_marginTop="56dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/cert2_title_tv" />
@@ -31,11 +31,12 @@
         android:id="@+id/cert2_title2_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="60dp"
-        android:layout_marginTop="60dp"
+        android:layout_marginStart="56dp"
+        android:layout_marginTop="30dp"
+        android:fontFamily="@font/pretendard_bold"
         android:text="워터마크 데이터"
         android:textSize="18sp"
-        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/cert1_gridlayout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/cert2_result_iv" />
 
@@ -43,6 +44,7 @@
         android:id="@+id/cert1_gridlayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:columnCount="2"
         app:layout_constraintStart_toStartOf="@id/cert2_title2_tv"
         app:layout_constraintTop_toBottomOf="@id/cert2_title2_tv"
@@ -59,7 +61,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="홍길동"
-            android:textSize="16sp"
+            android:layout_marginLeft="8dp"
+            android:layout_margin="2dp"
+            android:fontFamily="@font/pretendard_bold"
+            android:textSize="15sp"
             />
 
         <TextView
@@ -70,16 +75,24 @@
         <TextView
             android:id="@+id/cert2_id_tv"
             android:text="HongGildong"
-            android:textSize="16sp"/>
+            android:layout_marginLeft="8dp"
+            android:layout_margin="2dp"
+            android:fontFamily="@font/pretendard_bold"
+            android:textSize="15sp"/>
 
         <TextView
-            android:text="삽입날짜:  "/>
+            android:text="삽입날짜:  "
+            android:layout_margin="2dp"
+            android:textSize="15dp"
+            android:fontFamily="@font/pretendard_regular"/>
 
         <TextView
             android:id="@+id/cert2_date_tv"
             android:text="2000.00.00"
-            android:textSize="16sp" />
-
+            android:textSize="15dp"
+            android:layout_margin="2dp"
+            android:layout_marginLeft="8dp"
+            android:fontFamily="@font/pretendard_bold"/>
     </GridLayout>
 
     <TextView
@@ -87,11 +100,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="QR 데이터가 없거나 손상되었습니다."
-        app:layout_constraintTop_toBottomOf="@id/cert1_gridlayout"
-        app:layout_constraintStart_toStartOf="@id/cert1_gridlayout"
         android:textColor="#ff0000"
-        android:visibility="visible"/>
-
+        android:visibility="visible"
+        android:layout_marginTop="8dp"
+        android:fontFamily="@font/pretendard_bold"
+        app:layout_constraintStart_toStartOf="@id/cert1_gridlayout"
+        app:layout_constraintTop_toBottomOf="@id/cert1_gridlayout" />
 
     <Button
         android:id="@+id/cert2_end_btn"
@@ -99,9 +113,12 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="20dp"
         android:text="홈으로 돌아가기"
+        android:fontFamily="@font/pretendard_bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cert1_gridlayout" />
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
