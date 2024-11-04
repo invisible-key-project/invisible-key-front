@@ -4,6 +4,7 @@
     <style name="noAnimBottomNavigationView">
         <item name="android:animateLayoutChanges">false</item>
         <item name="android:transitionGroup">false</item>
+        <item name="android:fontFamily">@font/pretendard_medium</item>
     </style>
 
     <style name="Widget.BottomNavigationView" parent="Widget.MaterialComponents.BottomNavigationView">
@@ -12,7 +13,6 @@
         <item name="itemTextAppearance">@style/MyBottomNavigationViewTextAppearance</item>
         <item name="labelVisibilityMode">labeled</item> <!-- 항상 라벨 표시 -->
         <item name="rippleColor">@color/transparent</item>
-        <item name="fontFamily">@font/pretendard_medium</item>
     </style>
 
     <style name="MyBottomNavigationViewTextAppearance" parent="TextAppearance.MaterialComponents.Body1">
