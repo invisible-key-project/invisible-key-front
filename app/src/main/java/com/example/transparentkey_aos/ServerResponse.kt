@@ -3,6 +3,7 @@ package com.example.transparentkey_aosdata class ServerResponse(
     val watermark: String,
     val userId : String,
     val date : String,
+    val error: Boolean,
 )
 
 

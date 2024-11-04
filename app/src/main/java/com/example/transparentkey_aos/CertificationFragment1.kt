@@ -59,7 +59,7 @@ class CertificationFragment1 : Fragment() {
     }
 
     val retrofit = Retrofit.Builder()
-        .baseUrl("http://192.168.45.122:8000/") // 서버 URL
+        .baseUrl("http://172.18.25.74:8000/") // 서버 URL
         .addConverterFactory(GsonConverterFactory.create()) // JSON 변환기
         .build()
 
@@ -81,8 +81,20 @@ class CertificationFragment1 : Fragment() {
             }
         }
         binding.cert1ExtractBtn.setOnClickListener {
+            val viewModel = ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
+            val serverResponse = viewModel.serverResponse.value
+
+            // 에러 메시지가 있는 경우를 처리
+            val isError = serverResponse?.message == "QR 코드를 찾을 수 없습니다."
+
+            val bundle = Bundle().apply {
+                putBoolean("isError", isError)
+                putString("errorMessage", serverResponse?.message)
+            }
+            val fragment = CertificationFragment2().apply { arguments = bundle }
+
             (context as MainActivity).supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainer, CertificationFragment2())
+                .replace(R.id.fragmentContainer, fragment)
                 .commitAllowingStateLoss()
         }
 
@@ -163,31 +175,20 @@ class CertificationFragment1 : Fragment() {
         call.enqueue(object : Callback<ServerResponse> {
             override fun onResponse(call: Call<ServerResponse>, response: Response<ServerResponse>) {
                 if (response.isSuccessful) {
-                    // 서버로부터의 응답을 받음
                     val serverResponse = response.body()
-                    // ViewModel 인스턴스 가져오기
                     val viewModel = ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
-                    // ViewModel에 ServerResponse 저장
                     viewModel.serverResponse.value = serverResponse
 
                     val base64EncodedImage = serverResponse?.watermark ?: ""
-
-                    // Base64 문자열을 바이트 배열로 디코딩
                     val decodedBytes = Base64.decode(base64EncodedImage, Base64.DEFAULT)
-
-                    // 바이트 배열을 Bitmap으로 변환
                     val decodedBitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
 
-                    // 이미지 저장소에 Bitmap 저장
                     ImageStorage.currentImage = decodedBitmap
 
                     // 메인 스레드에서 UI 업데이트
                     activity?.runOnUiThread {
-                        // 이미지 저장소에 Bitmap 저장
                         ImageStorage.currentImage = decodedBitmap
-
-                        binding.cert1ExtractBtn.isEnabled=true
-                        // 에러 메시지 숨기기
+                        binding.cert1ExtractBtn.isEnabled = true
                         binding.cert1ErrorTv.visibility = View.GONE
                     }
                     Log.d("Upload", "Upload successful")
@@ -204,9 +205,7 @@ class CertificationFragment1 : Fragment() {
                 activity?.runOnUiThread {
                     // 에러 메시지 보이기
                     binding.cert1ErrorTv.visibility = View.VISIBLE
-                    // 에러 텍스트 설정 (선택적)
                     binding.cert1ErrorTv.text = "Network error"
-
                     binding.cert1ExtractBtn.isEnabled=false
 
                 }
