@@ -56,10 +56,12 @@ class CertificationFragment2 : Fragment() {
             val errorMessage = it.getString("errorMessage", "")
 
             if (isError) {
-                binding.cret2ErrorTv.text = errorMessage
-                binding.cret2ErrorTv.visibility = View.VISIBLE
+//                binding.cret2ErrorTv.text = errorMessage
+//                binding.cret2ErrorTv.visibility = View.VISIBLE
+                binding.cert2Title2Tv.visibility = View.INVISIBLE
                 binding.cert1Gridlayout.visibility = View.GONE
             } else {
+                binding.cert2TitleTv.text = "워터마크 인증 성공!"
                 binding.cret2ErrorTv.visibility = View.GONE
                 binding.cert1Gridlayout.visibility = View.VISIBLE
             }
